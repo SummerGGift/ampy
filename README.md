@@ -40,19 +40,19 @@ Once installed verify you can run the ampy program and get help output:
 You should see usage information displayed like below:
 
     Usage: ampy [OPTIONS] COMMAND [ARGS]...
-
+    
       ampy - Adafruit MicroPython Tool
-
+    
       Ampy is a tool to control MicroPython boards over a serial connection.
       Using ampy you can manipulate files on the board's internal filesystem and
       even run scripts.
-
+    
     Options:
       -p, --port PORT  Name of serial port for connected board.  [required]
       -b, --baud BAUD  Baud rate for the serial connection. (default 115200)
       -d, --delay DELAY Delay in seconds before entering RAW MODE (default 0)
       --help           Show this message and exit.
-
+    
     Commands:
       get  Retrieve a file from the board.
       ls   List contents of a directory on the board.
@@ -120,3 +120,7 @@ AMPY_DELAY=0.5
 
 You can put the `.ampy` file in your working directory, one of its parents, or in
 your home directory.
+
+```
+python cli.py -p COM18 ls /scripts
+```

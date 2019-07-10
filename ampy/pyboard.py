@@ -214,7 +214,8 @@ class Pyboard:
     def exit_raw_repl(self):
         self.serial.write(b'\r\x02') # ctrl-B: enter friendly REPL
 
-    def follow(self, timeout, data_consumer=None):
+    def follow(self, timeout, data_consumer=None, cmdtype = None):
+
         # wait for normal output
         data = self.read_until(1, b'\x04', timeout=timeout, data_consumer=data_consumer)
         if not data.endswith(b'\x04'):
@@ -226,6 +227,12 @@ class Pyboard:
         if not data_err.endswith(b'\x04'):
             raise PyboardError('timeout waiting for second EOF reception')
         data_err = data_err[:-1]
+
+        # check we have a prompt
+        if cmdtype == None:
+            data = self.read_until(1, b'>')
+            if not data.endswith(b'>'):
+                raise PyboardError('could not enter raw repl')
 
         # return normal and error output
         return data, data_err
@@ -252,17 +259,17 @@ class Pyboard:
         if data != b'OK':
             raise PyboardError('could not exec command')
 
-    def exec_raw(self, command, timeout=10, data_consumer=None):
+    def exec_raw(self, command, timeout=10, data_consumer=None, cmdtype=None):
         self.exec_raw_no_follow(command);
-        return self.follow(timeout, data_consumer)
+        return self.follow(timeout, data_consumer, cmdtype)
 
     def eval(self, expression):
         ret = self.exec_('print({})'.format(expression))
         ret = ret.strip()
         return ret
 
-    def exec_(self, command):
-        ret, ret_err = self.exec_raw(command)
+    def exec_(self, command, cmdtype=None):
+        ret, ret_err = self.exec_raw(command, 10, None, cmdtype)
         if ret_err:
             raise PyboardError('exception', ret, ret_err)
         return ret

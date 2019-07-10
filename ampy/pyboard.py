@@ -277,7 +277,7 @@ class Pyboard:
     def execfile(self, filename):
         with open(filename, 'rb') as f:
             pyfile = f.read()
-        return self.exec_(pyfile)
+        return self.exec_(pyfile, "run")
 
     def get_time(self):
         t = str(self.eval('pyb.RTC().datetime()'), encoding='utf8')[1:-1].split(', ')

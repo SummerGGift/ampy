@@ -130,6 +130,8 @@ python cli.py -p COM18 mkdir 6666
 
 python cli.py -p COM18 rmdir 6666
 
+python cli.py -p COM18 rm filename
+
 python cli.py -p COM18 run py.py
 
 python cli.py -p COM18 put py.py py.py  # 注意写入到文件系统中的文件必须是 unix 格式，否则读出时会出问题

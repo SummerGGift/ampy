@@ -69,7 +69,7 @@ class Files(object):
         )
         self._pyboard.enter_raw_repl()
         try:
-            out = self._pyboard.exec_(textwrap.dedent(command))
+            out = self._pyboard.exec_(textwrap.dedent(command), "get")
         except PyboardError as ex:
             # Check if this is an OSError #2, i.e. file doesn't exist and
             # rethrow it as something more descriptive.

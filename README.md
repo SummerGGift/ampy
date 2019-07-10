@@ -123,4 +123,13 @@ your home directory.
 
 ```
 python cli.py -p COM18 ls /scripts
+
+python cli.py -p COM18 ls -l -r
+
+python cli.py -p COM18 mkdir 6666
+
+python cli.py -p COM18 rmdir 6666
+
+python cli.py -p COM18 run py_test.py
+
 ```

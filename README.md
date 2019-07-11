@@ -122,9 +122,11 @@ You can put the `.ampy` file in your working directory, one of its parents, or i
 your home directory.
 
 ```python
+python cli.py -p COM18 ls
+
 python cli.py -p COM18 ls /scripts
 
-python cli.py -p COM18 ls -l -r
+python cli.py -p COM18 ls -l -r        # 递归打印出文件列表
 
 python cli.py -p COM18 mkdir 6666
 
@@ -138,4 +140,5 @@ python cli.py -p COM18 put py.py py.py  # 注意写入到文件系统中的文�
 
 python cli.py -p COM18 get py.py 123456
 
+python cli.py -p COM18 put local_library remote_library
 ```

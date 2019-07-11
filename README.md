@@ -10,7 +10,17 @@ to a board to be executed.
 
 ## Installation
 
+使用默认源安装依赖包：
+
+```
 pip install -r requirements.txt
+```
+
+还可以使用国内镜像源安装依赖包：
+
+```
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+```
 
 ## Usage
 

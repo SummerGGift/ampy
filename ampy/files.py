@@ -101,6 +101,7 @@ class Files(object):
         command = """\
                 try:        
                     import os
+                    import gc
                 except ImportError:
                     import uos as os\n"""
 
@@ -133,13 +134,16 @@ class Files(object):
                                 result.add(dir_or_file)                     
 
                     _listdir(directory)
+                    gc.collect()
                     return sorted(result)\n"""
         else:
             command += """\
                 def listdir(directory):
-                    if directory == '/':                
+                    if directory == '/':
+                        gc.collect()                
                         return sorted([directory + f for f in os.listdir(directory)])
                     else:
+                        gc.collect()
                         return sorted([directory + '/' + f for f in os.listdir(directory)])\n"""
 
         # Execute os.listdir() command on the board.

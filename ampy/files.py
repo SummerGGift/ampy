@@ -210,6 +210,7 @@ class Files(object):
         """
         # Open the file for writing on the board and write chunks of data.
         self._pyboard.enter_raw_repl()
+        self._pyboard.exec_("import gc")
         self._pyboard.exec_("f = open('{0}', 'wb')".format(filename))
         size = len(data)
         # Loop through and write a buffer size chunk of data at a time.
@@ -221,6 +222,7 @@ class Files(object):
                 chunk = "b" + chunk
             self._pyboard.exec_("f.write({0})".format(chunk))
         self._pyboard.exec_("f.close()")
+        self._pyboard.exec_("gc.collect()")
         self._pyboard.exit_raw_repl()
 
     def rm(self, filename):
@@ -264,6 +266,7 @@ class Files(object):
         command = """
             try:
                 import os
+                import gc
             except ImportError:
                 import uos as os
             def rmdir(directory):
@@ -278,6 +281,7 @@ class Files(object):
                 os.chdir('..')
                 os.rmdir(directory)
             rmdir('{0}')
+            gc.collect()
         """.format(
             directory
         )

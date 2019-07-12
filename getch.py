@@ -48,13 +48,13 @@ class _GetchWindows:
         # special keys (like left/right arrow) so we map these to the
         # characters that MicroPythons readline function will work with.
         self.keymap = {
-            b'G': b'\x01',   # Control-A Home
-            b'K': b'\x02',   # Control-B Left Arrow
-            b'S': b'\x04',   # Control-D DEL
-            b'O': b'\x05',   # Control-E End
-            b'M': b'\x06',   # Control-F Right Arrow
-            b'P': b'\x0e',   # Control-N Down Arrow (Next line in history)
-            b'H': b'\x10',   # Control-P Up Arrow (Prev line in history)
+            b'G': b'\x1B\x5B\x31\x7E',   # Control-A Home
+            b'O': b'\x1B\x5B\x34\x7E',   # Control-E End
+            b'S': b'\x04',               # Control-D DEL
+            b'H': b'\x1B\x5B\x41',       # Control-P Up Arrow (Prev line in history)
+            b'P': b'\x1B\x5B\x42',       # Control-N Down Arrow (Next line in history)
+            b'M': b'\x1B\x5B\x43',       # Control-F Right Arrow
+            b'K': b'\x1B\x5B\x44',       # Control-B Left Arrow
         }
 
     def __call__(self):

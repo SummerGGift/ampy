@@ -25,9 +25,12 @@ import platform
 import posixpath
 import re
 import serial.serialutil
+import threading
 
 import click
 import dotenv
+
+from getch import getch
 
 # Load AMPY_PORT et al from .ampy file
 # Performed here because we need to beat click's decorators.
@@ -37,7 +40,7 @@ if config:
 
 import ampy.files as files
 import ampy.pyboard as pyboard
-
+from ampy.pyboard import stdout
 
 _board = None
 
@@ -412,6 +415,95 @@ def reset(mode):
         # An error is expected to occur, as the board should disconnect from
         # serial when restarted via microcontroller.reset()
         pass
+
+import sys
+# python cli.py -p COM18 repl
+def repl_serial_to_stdout(serial):
+
+    def hexsend(string_data=''):
+        hex_data = string_data.decode("hex")
+        return hex_data
+
+    try:
+        while True:
+            count = serial.inWaiting()
+
+            if count > 0:
+                # data = serial.readline()
+                data = serial.read(1)
+                # print(type(data))
+                if data != b'':
+                    # print(data.replace(b"\r\n", b"").decode())
+                    # print("to : stdio")
+                    print(data.replace(b"\r", b"").decode(), end = "")
+                    sys.stdout.flush()
+                else:
+                    serial.write(hexsend(data))
+    except KeyboardInterrupt:
+        if serial != None:
+            serial.close()
+
+@cli.command()
+# @click.argument("local_file")
+# @click.option(
+#     "--no-output",
+#     "-n",
+#     is_flag=True,
+#     help="Run the code without waiting for it to finish and print output.  Use this when running code with main loops that never return.",
+# )
+
+def repl():
+
+    serial = _board.serial
+    """enter repl mode on console."""
+    repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')
+    # repl_thread.daemon = True
+    repl_thread.start()
+
+    dev = serial
+
+    # repl_serial_to_stdout(serial)
+    try:
+        # Wake up the prompt
+        dev.write(b'\r')
+
+        while True:
+            char = getch()
+            # print(type(char))
+            # char = sys.stdin.read(1)
+            # print(type(char)
+            if not char:
+                continue
+            # if char == QUIT_REPL_BYTE:
+            #     self.quit_serial_reader = True
+            #     # When using telnet with the WiPy, it doesn't support
+            #     # an initial timeout. So for the meantime, we send a
+            #     # space which should cause the wipy to echo back a
+            #     # space which will wakeup our reader thread so it will
+            #     # notice the quit.
+            #     dev.write(b' ')
+            #     # Give the reader thread a chance to detect the quit
+            #     # then we don't have to call getch() above again which
+            #     # means we'd need to wait for another character.
+            #     time.sleep(0.5)
+            #     # Print a newline so that the rshell prompt looks good.
+            #     self.print('')
+            #     # We stay in the loop so that we can still enter
+            #     # characters until we detect the reader thread quitting
+            #     # (mostly to cover off weird states).
+            #     continue
+            if char == b'\n':
+                dev.write(b'\r')
+            else:
+                dev.write(char)
+    except DeviceError as err:
+        # The device is no longer present.
+        self.print('')
+        self.stdout.flush()
+        print_err(err)
+    repl_thread.join()
+
+    print("begin to enter repl mode.")
 
 
 if __name__ == "__main__":

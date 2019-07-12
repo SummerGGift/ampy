@@ -458,15 +458,6 @@ def repl_serial_to_stdout(serial):
             serial.close()
 
 @cli.command()
-# @click.argument("local_file")
-# @click.option(
-#     "--no-output",
-#     "-n",
-#     is_flag=True,
-#     help="Run the code without waiting for it to finish and print output.  Use this when running code with main loops that never return.",
-# )
-
-
 def repl():
 
     global serial_reader_running

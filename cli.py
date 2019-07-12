@@ -29,8 +29,12 @@ import threading
 import click
 import dotenv
 import sys
+import time
+
 
 from getch import getch
+
+serial_reader_running = None
 
 # Load AMPY_PORT et al from .ampy file
 # Performed here because we need to beat click's decorators.
@@ -43,7 +47,6 @@ import ampy.pyboard as pyboard
 from ampy.pyboard import stdout
 
 _board = None
-
 
 def windows_full_port_name(portname):
     # Helper function to generate proper Windows COM port paths.  Apparently
@@ -424,7 +427,7 @@ def repl_serial_to_stdout(serial):
         return hex_data
 
     try:
-        while True:
+        while serial_reader_running:
             count = serial.inWaiting()
             if count > 0:
                 try:
@@ -463,12 +466,16 @@ def repl_serial_to_stdout(serial):
 #     help="Run the code without waiting for it to finish and print output.  Use this when running code with main loops that never return.",
 # )
 
+
 def repl():
 
+    global serial_reader_running
+    serial_reader_running = True
+
     serial = _board.serial
-    """enter repl mode on console."""
+
     repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')
-    # repl_thread.daemon = True
+    repl_thread.daemon = True
     repl_thread.start()
 
     try:
@@ -480,24 +487,26 @@ def repl():
 
             if not char:
                 continue
-            # if char == QUIT_REPL_BYTE:
-            #     self.quit_serial_reader = True
-            #     # When using telnet with the WiPy, it doesn't support
-            #     # an initial timeout. So for the meantime, we send a
-            #     # space which should cause the wipy to echo back a
-            #     # space which will wakeup our reader thread so it will
-            #     # notice the quit.
-            #     serial.write(b' ')
-            #     # Give the reader thread a chance to detect the quit
-            #     # then we don't have to call getch() above again which
-            #     # means we'd need to wait for another character.
-            #     time.sleep(0.5)
-            #     # Print a newline so that the rshell prompt looks good.
-            #     self.print('')
-            #     # We stay in the loop so that we can still enter
-            #     # characters until we detect the reader thread quitting
-            #     # (mostly to cover off weird states).
-            #     continue
+
+            if char == b'\x18':   # enter ctrl + x to exit repl mode
+                serial_reader_running = False
+                # When using telnet with the WiPy, it doesn't support
+                # an initial timeout. So for the meantime, we send a
+                # space which should cause the wipy to echo back a
+                # space which will wakeup our reader thread so it will
+                # notice the quit.
+                serial.write(b' ')
+                # Give the reader thread a chance to detect the quit
+                # then we don't have to call getch() above again which
+                # means we'd need to wait for another character.
+                time.sleep(0.1)
+                # Print a newline so that the rshell prompt looks good.
+                print('')
+                # We stay in the loop so that we can still enter
+                # characters until we detect the reader thread quitting
+                # (mostly to cover off weird states).
+                return
+
             if char == b'\n':
                 serial.write(b'\r')
             else:
@@ -507,10 +516,9 @@ def repl():
         self.print('')
         self.stdout.flush()
         print_err(err)
+        print("exit repl")
+
     repl_thread.join()
-
-    print("begin to enter repl mode.")
-
 
 if __name__ == "__main__":
     try:

@@ -26,9 +26,9 @@ import posixpath
 import re
 import serial.serialutil
 import threading
-
 import click
 import dotenv
+import sys
 
 from getch import getch
 
@@ -416,8 +416,7 @@ def reset(mode):
         # serial when restarted via microcontroller.reset()
         pass
 
-import sys
-# python cli.py -p COM18 repl
+
 def repl_serial_to_stdout(serial):
 
     def hexsend(string_data=''):
@@ -427,18 +426,30 @@ def repl_serial_to_stdout(serial):
     try:
         while True:
             count = serial.inWaiting()
-
             if count > 0:
-                # data = serial.readline()
-                data = serial.read(1)
-                # print(type(data))
-                if data != b'':
-                    # print(data.replace(b"\r\n", b"").decode())
-                    # print("to : stdio")
-                    print(data.replace(b"\r", b"").decode(), end = "")
-                    sys.stdout.flush()
-                else:
-                    serial.write(hexsend(data))
+                try:
+                    data = serial.read(1)
+
+                    if data != b'':
+                        print(data.replace(b"\r", b"").decode(), end = "")
+                        sys.stdout.flush()
+                    else:
+                        serial.write(hexsend(data))
+
+                except serial.serialutil.SerialException:
+                    # This happens if the pyboard reboots, or a USB port
+                    # goes away.
+                    return
+                except TypeError:
+                    # This is a bug in serialposix.py starting with python 3.3
+                    # which causes a TypeError during the handling of the
+                    # select.error. So we treat this the same as
+                    # serial.serialutil.SerialException:
+                    return
+                except ConnectionResetError:
+                    # This happens over a telnet session, if it resets
+                    return
+
     except KeyboardInterrupt:
         if serial != None:
             serial.close()
@@ -460,18 +471,13 @@ def repl():
     # repl_thread.daemon = True
     repl_thread.start()
 
-    dev = serial
-
-    # repl_serial_to_stdout(serial)
     try:
         # Wake up the prompt
-        dev.write(b'\r')
+        serial.write(b'\r')
 
         while True:
             char = getch()
-            # print(type(char))
-            # char = sys.stdin.read(1)
-            # print(type(char)
+
             if not char:
                 continue
             # if char == QUIT_REPL_BYTE:
@@ -481,7 +487,7 @@ def repl():
             #     # space which should cause the wipy to echo back a
             #     # space which will wakeup our reader thread so it will
             #     # notice the quit.
-            #     dev.write(b' ')
+            #     serial.write(b' ')
             #     # Give the reader thread a chance to detect the quit
             #     # then we don't have to call getch() above again which
             #     # means we'd need to wait for another character.
@@ -493,9 +499,9 @@ def repl():
             #     # (mostly to cover off weird states).
             #     continue
             if char == b'\n':
-                dev.write(b'\r')
+                serial.write(b'\r')
             else:
-                dev.write(char)
+                serial.write(char)
     except DeviceError as err:
         # The device is no longer present.
         self.print('')

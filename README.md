@@ -13,18 +13,19 @@ to a board to be executed.
 使用默认源安装依赖包：
 
 ```
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 还可以使用国内镜像源安装依赖包：
 
 ```
-pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 ```
 
 ## Usage
 
 ```python
+python cli.py -p COM18 repl              # 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
 python cli.py -p COM18 ls                # 打印出开发板上 / 目录中的文件列表
 python cli.py -p COM18 ls /scripts       # 打印出开发板上 /scripts 文件夹中的文件列表
 python cli.py -p COM18 ls -l -r          # 递归打印出 / 目录中文件列表

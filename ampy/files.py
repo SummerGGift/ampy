@@ -178,7 +178,7 @@ class Files(object):
 
                 count = 0
                 while(count < len(file_info.split(", "))):
-                    file_dict[file_info.split(", ")[count].split(" - ")[0]] = file_info.split(", ")[count].split(" - ")[2]
+                    file_dict[file_info.split(", ")[count].split(" - ")[0][1:]] = file_info.split(", ")[count].split(" - ")[2]
                     count += 1
 
                 with open("file_info.json", 'w') as f:

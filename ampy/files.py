@@ -21,6 +21,7 @@
 # SOFTWARE.
 import ast
 import textwrap
+import json
 
 from ampy.pyboard import PyboardError
 
@@ -151,8 +152,9 @@ class Files(object):
             command += """
                 r = []
                 for f in listdir('{0}'):
-                    size = os.stat(f)[6]                    
-                    r.append('{{0}} - {{1}} bytes'.format(f, size))
+                    size = os.stat(f)[6]  
+                    md5 = os.file_md5(f)
+                    r.append('{{0}} - {{1}} - {{2}}'.format(f, size, md5))
                 print(r)
             """.format(
                 directory
@@ -166,6 +168,22 @@ class Files(object):
         self._pyboard.enter_raw_repl()
         try:
             out = self._pyboard.exec_(textwrap.dedent(command), "ls")
+
+            if long_format:
+                file_info = out.decode("utf-8")
+                info_end = file_info.find("]")
+                file_info = file_info.rstrip()[1:info_end].replace("\'","")
+
+                file_dict = {}
+
+                count = 0
+                while(count < len(file_info.split(", "))):
+                    file_dict[file_info.split(", ")[count].split(" - ")[0]] = file_info.split(", ")[count].split(" - ")[2]
+                    count += 1
+
+                with open("file_info.json", 'w') as f:
+                    f.write(str(file_dict))
+
         except PyboardError as ex:
             # Check if this is an OSError #2, i.e. directory doesn't exist and
             # rethrow it as something more descriptive.

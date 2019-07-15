@@ -43,3 +43,8 @@ python cli.py -p com18 sync -l "G:\prj_dir" # 将本地 project_dir 文件夹同
 
 - 第一步执行 `python cli.py -p COM18 ls -l -r` 获取设备文件列表到本地
 - 第二步执行`python cli.py -p com18 sync -l "G:\prj_dir"` 进行文件同步
+
+## 在设备上执行文件
+
+- `python cli.py -p com18 run none -d scripts/hello.py` 执行设备上的 `scripts/hello.py`
+

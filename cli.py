@@ -321,7 +321,16 @@ def rmdir(remote_folder, missing_okay):
     is_flag=True,
     help="Run the code without waiting for it to finish and print output.  Use this when running code with main loops that never return.",
 )
-def run(local_file, no_output):
+@click.option(
+    "--device_file",
+    "-d",
+    envvar="run file in device",
+    default=0,
+    type=click.STRING,
+    help="run file in device",
+    metavar="run file in device",
+)
+def run(local_file, no_output, device_file):
     """Run a script and print its output.
 
     Run will send the specified file to the board and execute it immediately.
@@ -340,10 +349,15 @@ def run(local_file, no_output):
 
       ampy --port /board/serial/port run --no-output test.py
     """
+
     # Run the provided file and print its output.
     board_files = files.Files(_board)
     try:
-        output = board_files.run(local_file, not no_output)
+        if device_file:
+            output = board_files.run_in_device(device_file, not no_output)
+        else:
+            output = board_files.run(local_file, not no_output)
+
         if output is not None:
             print(output.decode("utf-8"), end="")
     except IOError:

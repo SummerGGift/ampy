@@ -335,3 +335,31 @@ class Files(object):
                 self._pyboard.exec_raw_no_follow(infile.read())
         self._pyboard.exit_raw_repl()
         return out
+
+    def run_in_device(self, filename, wait_output=True):
+        """Run the provided script and return its output.  If wait_output is True
+        (default) then wait for the script to finish and then print its output,
+        otherwise just run the script and don't wait for any output.
+        """
+
+        command = """
+            with open('{0}') as __py:
+                exec(__py.read(),globals())
+        """.format(
+            filename
+        )
+
+        self._pyboard.enter_raw_repl()
+        try:
+            out = self._pyboard.exec_(textwrap.dedent(command), "ls")
+        except PyboardError as ex:
+            # Check if this is an OSError #2, i.e. directory doesn't exist and
+            # rethrow it as something more descriptive.
+            if ex.args[2].decode("utf-8").find("OSError: [Errno 2] ENOENT") != -1:
+                raise RuntimeError("No such directory: {0}".format(directory))
+            else:
+                raise ex
+        self._pyboard.exit_raw_repl()
+        # Parse the result list and return it.
+        # return ast.literal_eval(out.decode("utf-8"))
+        return out

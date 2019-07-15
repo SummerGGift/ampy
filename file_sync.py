@@ -11,33 +11,34 @@
 import os
 import hashlib
 
-name = 'name'
-md5 = 'md5'
+def get_file_hash(file_path):
+    myhash = hashlib.md5()
+    f = open(file_path,'rb')
+    while True:
+        b = f.read(8096)
+        if not b :
+            break
+        myhash.update(b)
+    f.close()
+    return str(myhash.hexdigest())
 
 def get_pc_dir_info(path):
     result = []
-    paths = os.listdir(path)
-    for i, item in enumerate(paths):
-        sub_path = os.path.join(path, item)
-        if os.path.isdir(sub_path):
+
+    for root, dirs, files in os.walk(path, topdown=False):
+        for name in files:
             file_info = {}
-            file_info[name] = os.path.join(path[len(local) - 1:], item).replace('\\', '/')
-            file_info[md5] = 'dir'
+            file_key = os.path.join(root, name)[len(os.path.dirname(path)) + 1:].replace('\\', '/')
+            file_info['name'] = file_key
+            file_info['md5'] = get_file_hash(os.path.join(root, name))
             result.append(file_info)
-            result += get_pc_dir_info(sub_path + '/')
-        else:
-            myhash = hashlib.md5()
-            f = open(sub_path,'rb')
-            while True:
-                b = f.read(8096)
-                if not b :
-                    break
-                myhash.update(b)
-            f.close()
+
+        for name in dirs:
             file_info = {}
-            file_info[name] = os.path.join(path[len(local) - 1 :], item).replace('\\', '/')
-            file_info[md5] = str(myhash.hexdigest())
-            result.append(file_info)
+            file_key = os.path.join(root, name)[len(os.path.dirname(path)) + 1:].replace('\\', '/')
+            file_info['name'] = file_key
+            file_info['md5'] = 'dir'
+
     return result
 
 def get_sync_info(pc_info, dev_info):
@@ -47,7 +48,6 @@ def get_sync_info(pc_info, dev_info):
     temp = {}
 
     for filename, md5 in pc_info.items():
-        # print(filename, md5)
         if filename in dev_info.keys():         # If the file exists on both the PC and device side
             if md5 == 'dir':
                 continue
@@ -73,10 +73,8 @@ def get_sync_info(pc_info, dev_info):
 
     return sync_info
 
-def file_sync_info(local_path, remote_path):
+def file_sync_info(local_path):
 
-    global local
-    local = os.path.basename(local_path.replace('\\', '/'))   
     pc_file_info = {}
     dev_file_info = {}
 

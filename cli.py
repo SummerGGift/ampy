@@ -546,10 +546,6 @@ def sync(local_path, remote_path = None):
 
         board_files = files.Files(_board)
 
-        # delete files
-        for item in delete_file_list:
-            board_files.rm(item)
-
         # Directory copy, create the directory and walk all children to copy
         # over the files.
         for parent, child_dirs, child_files in os.walk(local):
@@ -558,7 +554,7 @@ def sync(local_path, remote_path = None):
                 posixpath.join(local, os.path.relpath(parent, local))
             )
             try:
-                print(remote_parent)
+                # print(remote_parent)
                 # Create remote parent directory.
                 board_files.mkdir(remote_parent)
                 # Loop through all the files and put them on the board too.
@@ -576,8 +572,12 @@ def sync(local_path, remote_path = None):
                 board_files = files.Files(_board)
                 board_files.put(item, infile.read())
 
-    sync_info = file_sync_info(local_path, remote_path)
+        # delete files
+        for item in delete_file_list:
+            board_files.rm(item)
 
+    sync_info = file_sync_info(local_path)
+    # print(sync_info)
     _sync_file(sync_info, local_path)
 
 if __name__ == "__main__":

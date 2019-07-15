@@ -251,6 +251,7 @@ class Files(object):
             except ImportError:
                 import uos as os
             os.remove('{0}')
+            os.rmdir('{0}')
         """.format(
             filename
         )

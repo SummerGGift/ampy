@@ -540,7 +540,9 @@ def repl():
 
 def sync(local_path, remote_path = None):
     def _sync_file(sync_info, local, remote = None):
-        local = os.path.basename(local.replace('\\', '/'))
+
+        local = local.replace('\\', '/')
+
         delete_file_list = sync_info["delete"]
         sync_file_list = sync_info["sync"]
 
@@ -553,10 +555,11 @@ def sync(local_path, remote_path = None):
             remote_parent = posixpath.normpath(
                 posixpath.join(local, os.path.relpath(parent, local))
             )
+
             try:
                 # print(remote_parent)
                 # Create remote parent directory.
-                board_files.mkdir(remote_parent)
+                board_files.mkdir(remote_parent[len(os.path.dirname(local_path)) + 1:])
                 # Loop through all the files and put them on the board too.
 
             except files.DirectoryExistsError:
@@ -568,7 +571,9 @@ def sync(local_path, remote_path = None):
             # File copy, open the file and copy its contents to the board.
             # Put the file on the board.
 
-            with open(item, "rb") as infile:
+            item_local = os.path.join(os.path.dirname(local_path), item).replace('\\', '/')
+
+            with open(item_local, "rb") as infile:
                 board_files = files.Files(_board)
                 board_files.put(item, infile.read())
 
@@ -577,7 +582,7 @@ def sync(local_path, remote_path = None):
             board_files.rm(item)
 
     sync_info = file_sync_info(local_path)
-    # print(sync_info)
+    # print(os.path.dirname(local_path))
     _sync_file(sync_info, local_path)
 
 if __name__ == "__main__":

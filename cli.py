@@ -30,6 +30,8 @@ import click
 import dotenv
 import sys
 import time
+import hashlib
+import json
 
 
 from getch import getch
@@ -510,6 +512,115 @@ def repl():
         print("exit repl")
 
     repl_thread.join()
+
+
+@cli.command()
+
+@click.option(
+    "--local_path",
+    "-l",
+    envvar="local_path",
+    required=True,
+    default=0,
+    type=click.STRING,
+    help="local_path",
+    metavar="local_path",
+)
+
+@click.option(
+    "--remote_path",
+    "-r",
+    envvar="remote_path",
+    required=True,
+    default=0,
+    type=click.STRING,
+    help="remote_path",
+    metavar="remote_path",
+)
+
+def sync(local_path, remote_path):
+
+    name = 'name'
+    md5 = 'md5'
+    local_path = local_path.replace('\\', '/')
+
+    def get_pc_dir_info(path):
+        result = []
+        paths = os.listdir(path)
+        for i, item in enumerate(paths):
+            sub_path = os.path.join(path, item)
+            if os.path.isdir(sub_path):
+                file_info = {}
+                file_info[name] = os.path.join(path[len(local) - 1:], item).replace('\\', '/')
+                file_info[md5] = 'dir'
+                result.append(file_info)
+                result += get_pc_dir_info(sub_path + '/')
+            else:
+                myhash = hashlib.md5()
+                f = open(sub_path,'rb')
+                while True:
+                    b = f.read(8096)
+                    if not b :
+                        break
+                    myhash.update(b)
+                f.close()
+                file_info = {}
+                file_info[name] = os.path.join(path[len(local) - 1 :], item).replace('\\', '/')
+                file_info[md5] = str(myhash.hexdigest())
+                result.append(file_info)
+        return result
+
+    def get_sync_info(pc_info, dev_info):
+        sync_info = {}
+        delete_list = []
+        sync_list = []
+        temp = {}
+
+        for filename, md5 in pc_info.items():
+            # print(filename, md5)
+            if filename in dev_info.keys():         # If the file exists on both the PC and device side
+                if md5 == 'dir':
+                    continue
+                else:
+                    if md5 == dev_info[filename]:
+                        continue
+                    else:
+                        sync_list.append(filename)
+            else:
+                if md5 == 'dir':
+                    continue
+                else:
+                    sync_list.append(filename)
+
+        for filename, md5 in dev_info.items():
+            if filename in pc_info.keys():           # If the file exists on both the PC and device side
+                continue
+            else:
+                delete_list.append(filename)
+
+        sync_info['delete'] = delete_list
+        sync_info['sync'] = sync_list
+
+        return sync_info
+    
+    global local
+    local = os.path.basename(local_path)   
+
+    pc_info = get_pc_dir_info(local_path)
+
+    pc_file_info = {}
+
+    for item in pc_info:
+        pc_file_info[item["name"]] = item["md5"]
+
+    with open("file_info.json", 'r') as f:
+        dev_file_info = f.read()
+
+    dev_file_info = eval(dev_file_info)
+
+    print(get_sync_info(pc_file_info, dev_file_info))
+
+
 
 if __name__ == "__main__":
     try:

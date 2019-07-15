@@ -38,3 +38,8 @@ python cli.py -p COM18 put xx.py xx.py   # 注意写入的文件必须是 unix �
 python cli.py -p COM18 put local remote  # 将本地的 local 推送到开发板上，并且命名为 remote
 python cli.py -p com18 sync -l "G:\prj_dir" # 将本地 project_dir 文件夹同步到设备根目录
 ```
+
+## 设备文件同步
+
+- 第一步执行 `python cli.py -p COM18 ls -l -r` 获取设备文件列表到本地
+- 第二步执行`python cli.py -p com18 sync -l "G:\prj_dir"` 进行文件同步

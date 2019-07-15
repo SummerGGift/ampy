@@ -616,10 +616,23 @@ def sync(local_path, remote_path):
     with open("file_info.json", 'r') as f:
         dev_file_info = f.read()
 
-    dev_file_info = eval(dev_file_info)
+    sync_info = get_sync_info(pc_file_info, eval(dev_file_info))
 
-    print(get_sync_info(pc_file_info, dev_file_info))
+    delete_file_list = sync_info["delete"]
+    sync_file_list = sync_info["sync"]
 
+    # delete files
+    for item in delete_file_list:
+        board_files = files.Files(_board)
+        board_files.rm(item)
+
+    # add sync files
+    for item in sync_file_list:
+        # File copy, open the file and copy its contents to the board.
+        # Put the file on the board.
+        with open(item, "rb") as infile:
+            board_files = files.Files(_board)
+            board_files.put(item, infile.read())
 
 
 if __name__ == "__main__":

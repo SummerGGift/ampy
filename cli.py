@@ -538,7 +538,7 @@ def repl():
     metavar="remote_path",
 )
 
-def sync(local_path, remote_path):
+def sync(local_path, remote_path = None):
 
     name = 'name'
     md5 = 'md5'
@@ -618,18 +618,39 @@ def sync(local_path, remote_path):
 
     sync_info = get_sync_info(pc_file_info, eval(dev_file_info))
 
+    print(sync_info)
+
     delete_file_list = sync_info["delete"]
     sync_file_list = sync_info["sync"]
 
+    board_files = files.Files(_board)
+
     # delete files
     for item in delete_file_list:
-        board_files = files.Files(_board)
         board_files.rm(item)
 
-    # add sync files
+    # Directory copy, create the directory and walk all children to copy
+    # over the files.
+    for parent, child_dirs, child_files in os.walk(local):
+        # Create board filesystem absolute path to parent directory.
+        remote_parent = posixpath.normpath(
+            posixpath.join(local, os.path.relpath(parent, local))
+        )
+        try:
+            print(remote_parent)
+            # Create remote parent directory.
+            board_files.mkdir(remote_parent)
+            # Loop through all the files and put them on the board too.
+
+        except files.DirectoryExistsError:
+            # Ignore errors for directories that already exist.
+            pass
+
+        # add sync files
     for item in sync_file_list:
         # File copy, open the file and copy its contents to the board.
         # Put the file on the board.
+
         with open(item, "rb") as infile:
             board_files = files.Files(_board)
             board_files.put(item, infile.read())

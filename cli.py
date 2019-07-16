@@ -609,9 +609,10 @@ def sync(local_path, remote_path = None, info_pathname = None):
     if info_pathname == None:
         info_pathname = "file_info.json"
 
-    # List each file/directory on a separate line.
-    board_files = files.Files(_board)
-    board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
+    if not os.path.exists(info_pathname):
+        # List each file/directory on a separate line.
+        board_files = files.Files(_board)
+        board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
 
     sync_info = file_sync_info(local_path, info_pathname)
     _sync_file(sync_info, local_path)

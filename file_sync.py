@@ -87,6 +87,9 @@ def file_sync_info(local_path, info_pathname):
     with open(info_pathname, 'r') as f:
         dev_file_info = f.read()
 
+    with open(info_pathname, 'w') as f:
+        f.write(str(pc_file_info))
+
     return get_sync_info(pc_file_info, eval(dev_file_info))
 
 

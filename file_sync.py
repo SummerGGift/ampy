@@ -26,16 +26,17 @@ def get_pc_dir_info(path):
     result = []
 
     for root, dirs, files in os.walk(path, topdown=False):
+
         for name in files:
             file_info = {}
-            file_key = os.path.join(root, name)[len(os.path.dirname(path)) + 1:].replace('\\', '/')
+            file_key = os.path.join(root, name)[len(path) + 1:].replace('\\', '/')
             file_info['name'] = file_key
             file_info['md5'] = get_file_hash(os.path.join(root, name))
             result.append(file_info)
 
         for name in dirs:
             file_info = {}
-            file_key = os.path.join(root, name)[len(os.path.dirname(path)) + 1:].replace('\\', '/')
+            file_key = os.path.join(root, name)[len(path) + 1:].replace('\\', '/')
             file_info['name'] = file_key
             file_info['md5'] = 'dir'
 

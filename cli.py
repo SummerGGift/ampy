@@ -584,7 +584,7 @@ def sync(local_path, remote_path = None, info_pathname = None):
             try:
                 # print(remote_parent)
                 # Create remote parent directory.
-                board_files.mkdir(remote_parent[len(os.path.dirname(local_path)) + 1:])
+                board_files.mkdir(remote_parent[len(local_path) + 1:])
                 # Loop through all the files and put them on the board too.
 
             except files.DirectoryExistsError:
@@ -596,7 +596,7 @@ def sync(local_path, remote_path = None, info_pathname = None):
             # File copy, open the file and copy its contents to the board.
             # Put the file on the board.
 
-            item_local = os.path.join(os.path.dirname(local_path), item).replace('\\', '/')
+            item_local = os.path.join(local_path, item).replace('\\', '/')
 
             with open(item_local, "rb") as infile:
                 board_files = files.Files(_board)

@@ -40,9 +40,13 @@ python cli.py -p com18 sync -l "G:\prj_dir" # 将本地 project_dir 文件夹同
 ```
 
 ## 设备文件同步
+执行如下命令：
+```
+python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
+```
 
-- 第一步执行 `python cli.py -p COM18 ls -l -r` 获取设备文件列表到本地
-- 第二步执行`python cli.py -p com18 sync -l "G:\prj_dir"` 进行文件同步
+-l 参数后面跟想要同步的文件夹， -i 参数后面跟存储同步信息文件的位置。
+
 
 ## 在设备上执行文件
 

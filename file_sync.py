@@ -73,7 +73,7 @@ def get_sync_info(pc_info, dev_info):
 
     return sync_info
 
-def file_sync_info(local_path):
+def file_sync_info(local_path, info_pathname):
 
     pc_file_info = {}
     dev_file_info = {}
@@ -83,7 +83,7 @@ def file_sync_info(local_path):
     for item in pc_info:
         pc_file_info[item["name"]] = item["md5"]
 
-    with open("file_info.json", 'r') as f:
+    with open(info_pathname, 'r') as f:
         dev_file_info = f.read()
 
     return get_sync_info(pc_file_info, eval(dev_file_info))

@@ -81,7 +81,7 @@ class Files(object):
         self._pyboard.exit_raw_repl()
         return out
 
-    def ls(self, directory="/", long_format=True, recursive=False):
+    def ls(self, directory="/", long_format=True, recursive=False, pathname=None):
         """List the contents of the specified directory (or root if none is
         specified).  Returns a list of strings with the names of files in the
         specified directory.  If long_format is True then a list of 2-tuples
@@ -89,11 +89,6 @@ class Files(object):
         it appears the size of directories is not supported by MicroPython and
         will always return 0 (i.e. no recursive size computation).
         """
-
-        # Disabling for now, see https://github.com/adafruit/ampy/issues/55.
-        # # Make sure directory ends in a slash.
-        # if not directory.endswith("/"):
-        #     directory += "/"
 
         # Make sure directory starts with slash, for consistency.
         if not directory.startswith("/"):
@@ -166,6 +161,7 @@ class Files(object):
                 directory
             )
         self._pyboard.enter_raw_repl()
+
         try:
             out = self._pyboard.exec_(textwrap.dedent(command), "ls")
 
@@ -181,7 +177,7 @@ class Files(object):
                     file_dict[file_info.split(", ")[count].split(" - ")[0][1:]] = file_info.split(", ")[count].split(" - ")[2]
                     count += 1
 
-                with open("file_info.json", 'w') as f:
+                with open(pathname, 'w') as f:
                     f.write(str(file_dict))
 
         except PyboardError as ex:

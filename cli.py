@@ -614,8 +614,15 @@ def sync(local_path, remote_path = None, info_pathname = None):
         board_files = files.Files(_board)
         board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
 
-    sync_info = file_sync_info(local_path, info_pathname)
+    # Gets file synchronization information
+    sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
+
+    # Perform file synchronization
     _sync_file(sync_info, local_path)
+
+    # After successful file synchronization, update the local cache file information
+    with open(info_pathname, 'w') as f:
+        f.write(str(pc_file_info))
 
 if __name__ == "__main__":
     try:

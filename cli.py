@@ -101,11 +101,13 @@ def cli(port, baud, delay):
     scripts.
     """
     global _board
-    # On Windows fix the COM port path name for ports above 9 (see comment in
-    # windows_full_port_name function).
-    if platform.system() == "Windows":
-        port = windows_full_port_name(port)
-    _board = pyboard.Pyboard(port, baudrate=baud, rawdelay=delay)
+
+    if port != "query":
+        # On Windows fix the COM port path name for ports above 9 (see comment in
+        # windows_full_port_name function).
+        if platform.system() == "Windows":
+            port = windows_full_port_name(port)
+        _board = pyboard.Pyboard(port, baudrate=baud, rawdelay=delay)
 
 
 @cli.command()
@@ -624,6 +626,10 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
         info_pathname = "file_info.json"
 
     if not os.path.exists(info_pathname):
+        if query == "ifneedsync":
+            print("file need sync")
+            return
+
         # List each file/directory on a separate line.
         board_files = files.Files(_board)
         board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
@@ -634,10 +640,13 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
     # print(sync_info)
     # print(pc_file_info)
 
-    if query != None:
+    if query == "ifneedsync":
         if sync_info['delete'] == [] and sync_info['sync'] == []:
             print("<no need to sync>")
             return
+
+    if query == "ifneedsync":
+        return
 
     # Perform file synchronization
     _sync_file(sync_info, local_path)

@@ -57,7 +57,7 @@ python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
 查询是否需要文件同步。
 
 ```
-python .\cli.py -p com18 sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsync"
+python .\cli.py -p "query" sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsync"
 ```
 
 如果不需要文件同步，则会收到返回值 `<no need to sync>`。

@@ -54,3 +54,10 @@ python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
 
   对每一个开发板需要指定一个新的文件，否则会导致无法正确同步文件，如果不能确定指定的缓存文件是否正确，可以删除掉本地的缓存文件，并重新指定一个新的文件地址，同步代码会重新从设备文件系统中读取先关信息，并写入到这个文件里。
 
+查询是否需要文件同步。
+
+```
+python .\cli.py -p com18 sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsync"
+```
+
+如果不需要文件同步，则会收到返回值 `<no need to sync>`。

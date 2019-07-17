@@ -566,7 +566,18 @@ def repl():
     metavar="info_pathname",
 )
 
-def sync(local_path, remote_path = None, info_pathname = None):
+@click.option(
+    "--query",
+    "-q",
+    envvar="query",
+    # required=True,
+    default=None,
+    type=click.STRING,
+    help="query",
+    metavar="query",
+)
+
+def sync(local_path, remote_path = None, info_pathname = None, query = None):
     def _sync_file(sync_info, local, remote = None):
 
         local = local.replace('\\', '/')
@@ -619,14 +630,14 @@ def sync(local_path, remote_path = None, info_pathname = None):
 
     # Gets file synchronization information
     sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
-
+    
     # print(sync_info)
-
-    if sync_info['delete'] == [] and sync_info['sync'] == []:
-        print("<no need to sync>")
-        return
-
     # print(pc_file_info)
+
+    if query != None:
+        if sync_info['delete'] == [] and sync_info['sync'] == []:
+            print("<no need to sync>")
+            return
 
     # Perform file synchronization
     _sync_file(sync_info, local_path)

@@ -620,6 +620,14 @@ def sync(local_path, remote_path = None, info_pathname = None):
     # Gets file synchronization information
     sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
 
+    # print(sync_info)
+
+    if sync_info['delete'] == [] and sync_info['sync'] == []:
+        print("<no need to sync>")
+        return
+
+    # print(pc_file_info)
+
     # Perform file synchronization
     _sync_file(sync_info, local_path)
 

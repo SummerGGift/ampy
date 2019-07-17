@@ -493,6 +493,9 @@ def repl():
         while True:
             char = getch()
 
+            if char == b'\x00':
+                continue
+
             if not char:
                 continue
 

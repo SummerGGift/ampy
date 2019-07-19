@@ -212,6 +212,7 @@ class Files(object):
             # Check if this is an OSError #17, i.e. directory already exists.
             if ex.args[2].decode("utf-8").find("OSError: [Errno 17] EEXIST") != -1:
                 if not exists_okay:
+                    self._pyboard.exit_raw_repl()
                     raise DirectoryExistsError(
                         "Directory already exists: {0}".format(directory)
                     )

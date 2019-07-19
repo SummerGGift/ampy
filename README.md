@@ -16,6 +16,12 @@ python -m pip install -r requirements.txt
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 ```
 
+或者直接输入安装依赖命令：
+
+```python
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv
+```
+
 ## 使用方法
 
 ### MicroPython 开发板通用命令

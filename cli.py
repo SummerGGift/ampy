@@ -648,8 +648,12 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
     if query == "ifneedsync":
         return
 
-    # Perform file synchronization
-    _sync_file(sync_info, local_path)
+    try:
+        # Perform file synchronization
+        _sync_file(sync_info, local_path)
+    except:
+        print("error: _file_sync failed, please restart and retry.")
+        return
 
     # After successful file synchronization, update the local cache file information
     with open(info_pathname, 'w') as f:

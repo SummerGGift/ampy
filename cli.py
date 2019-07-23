@@ -590,6 +590,9 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
         delete_file_list = sync_info["delete"]
         sync_file_list = sync_info["sync"]
 
+        if delete_file_list == [] and sync_file_list == []:
+            return
+
         board_files = files.Files(_board)
 
         # Directory copy, create the directory and walk all children to copy
@@ -601,9 +604,11 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
             )
 
             try:
-                # print(remote_parent)
                 # Create remote parent directory.
-                board_files.mkdir(remote_parent[len(local_path) + 1:])
+                dir_name = remote_parent[len(local_path) + 1:]
+
+                if dir_name != "":
+                    board_files.mkdir(dir_name)
                 # Loop through all the files and put them on the board too.
 
             except files.DirectoryExistsError:

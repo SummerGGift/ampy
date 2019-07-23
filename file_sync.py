@@ -66,6 +66,7 @@ def get_pc_dir_info(path):
             file_key = os.path.join(root, name)[len(path) + 1:].replace('\\', '/')
             file_info['name'] = file_key
             file_info['md5'] = 'dir'
+            result.append(file_info)
 
     return result
 

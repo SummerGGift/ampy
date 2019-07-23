@@ -148,7 +148,7 @@ class Files(object):
                 r = []
                 for f in listdir('{0}'):
                     size = os.stat(f)[6]  
-                    md5 = os.file_crc(f)
+                    md5 = os.file_crc32(f)
                     r.append('{{0}} - {{1}} - {{2}}'.format(f, size, md5))
                 print(r)
             """.format(

@@ -148,7 +148,7 @@ class Files(object):
                 r = []
                 for f in listdir('{0}'):
                     size = os.stat(f)[6]  
-                    md5 = os.file_md5(f)
+                    md5 = os.file_crc(f)
                     r.append('{{0}} - {{1}} - {{2}}'.format(f, size, md5))
                 print(r)
             """.format(
@@ -161,6 +161,9 @@ class Files(object):
                 directory
             )
         self._pyboard.enter_raw_repl()
+
+        if pathname == None:
+            pathname = "temp_file_info.json"
 
         try:
             out = self._pyboard.exec_(textwrap.dedent(command), "ls")

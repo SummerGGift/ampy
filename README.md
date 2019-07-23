@@ -67,3 +67,7 @@ python .\cli.py -p "query" sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsy
 ```
 
 如果不需要文件同步，则会收到返回值 `<no need to sync>`。
+
+### exe 打包命令
+
+`    pyinstaller.exe -F .\cli.py -p ampy`

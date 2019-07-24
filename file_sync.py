@@ -26,7 +26,13 @@ def get_file_hash(file_path):
 
 
 def big_small_end_convert(data):
-    return binascii.hexlify(binascii.unhexlify(data)[::-1])
+    tmp0 = data[:2]
+    tmp1 = data[2:4]
+    tmp2 = data[4:6]
+    tmp3 = data[6:8]
+
+    value = tmp3 + tmp2 + tmp1 + tmp0
+    return value
 
 
 def get_file_crc32(file_path):
@@ -55,10 +61,10 @@ def get_pc_dir_info(path):
             file_key = os.path.join(root, name)[len(path) + 1:].replace('\\', '/')
             file_info['name'] = file_key
 
-            big_small = get_file_crc32(os.path.join(root, name))
+            big_small = get_file_crc32(os.path.join(root, name)).upper()
 
-            if big_small[0] != "-":
-                convert_value = str(big_small_end_convert(big_small),'utf-8').upper()
+            if len(big_small) == 8:
+                convert_value = big_small_end_convert(big_small).upper()
             else:
                 convert_value = "Invalid"
 

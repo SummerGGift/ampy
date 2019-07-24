@@ -56,7 +56,11 @@ def get_pc_dir_info(path):
             file_info['name'] = file_key
 
             big_small = get_file_crc32(os.path.join(root, name))
-            convert_value = str(big_small_end_convert(big_small),'utf-8').upper()
+
+            if big_small[0] != "-":
+                convert_value = str(big_small_end_convert(big_small),'utf-8').upper()
+            else:
+                convert_value = "Invalid"
 
             file_info['md5'] = convert_value
             result.append(file_info)

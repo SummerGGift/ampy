@@ -130,7 +130,7 @@ class Pyboard:
             delayed = False
             for attempt in range(wait + 1):
                 try:
-                    self.serial = serial.Serial(device, baudrate=baudrate, interCharTimeout=1)
+                    self.serial = serial.Serial(device, baudrate=baudrate, interCharTimeout=1, timeout=1)
                     break
                 except (OSError, IOError): # Py2 and Py3 have different errors
                     if wait == 0:
@@ -186,16 +186,20 @@ class Pyboard:
             self.serial.read(n)
             n = self.serial.inWaiting()
 
-        data = self.read_until(1, b'\x3E\x3E\x3E')
+        try:
+            data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
+        except:
+            raise PyboardError('Error: This not a MicroPython board no bytes')
+
         if not data.endswith(b'\x3E\x3E\x3E'):
-            raise PyboardError('This not a MicroPython board >>>')
+            raise PyboardError('Error: This not a MicroPython board >>>')
 
         self.serial.write(b'\r\x01')  # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')
 
         if not data.endswith(b'raw REPL; CTRL-B to exit\r\n>'):
             print("get rew REPL... data:%s", data)
-            raise PyboardError('This not a MicroPython board CA + CB')
+            raise PyboardError('Error: This not a MicroPython board CA + CB')
         else:
             self.serial.write(b'\x02')
 

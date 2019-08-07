@@ -485,6 +485,8 @@ def repl():
     global serial_reader_running
     serial_reader_running = True
 
+    _board.get_board_identity()
+
     serial = _board.serial
 
     repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')

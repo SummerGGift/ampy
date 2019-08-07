@@ -172,6 +172,35 @@ class Pyboard:
                 time.sleep(0.01)
         return data
 
+    def get_board_identity(self):
+        # Brief delay before sending RAW MODE char if requests
+        if _rawdelay > 0:
+            time.sleep(_rawdelay)
+
+        # ctrl-C twice: interrupt any running program
+        self.serial.write(b'\r\x03\x03')
+
+        # flush input (without relying on serial.flushInput())
+        n = self.serial.inWaiting()
+        while n > 0:
+            self.serial.read(n)
+            n = self.serial.inWaiting()
+
+        data = self.read_until(1, b'\x3E\x3E\x3E')
+        if not data.endswith(b'\x3E\x3E\x3E'):
+            raise PyboardError('This not a MicroPython board >>>')
+
+        self.serial.write(b'\r\x01')  # ctrl-A: enter raw REPL
+        data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')
+
+        if not data.endswith(b'raw REPL; CTRL-B to exit\r\n>'):
+            print("get rew REPL... data:%s", data)
+            raise PyboardError('This not a MicroPython board CA + CB')
+        else:
+            self.serial.write(b'\x02')
+
+        return True
+
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
         if _rawdelay > 0:

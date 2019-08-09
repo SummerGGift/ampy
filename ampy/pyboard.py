@@ -216,6 +216,16 @@ class Pyboard:
         else:
             return False
 
+    def is_have_uos(self):
+        
+        self.serial.write(b'\rimport uos\r')
+        data = self.read_until(1, b'module not found', timeout=0.1)
+
+        if data.endswith(b'module not found'):
+            return False
+        else:
+            return True
+
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
         if _rawdelay > 0:

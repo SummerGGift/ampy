@@ -38,6 +38,7 @@ from getch import getch
 from file_sync import file_sync_info
 
 serial_reader_running = None
+serial_out_put_enable = True
 
 # Load AMPY_PORT et al from .ampy file
 # Performed here because we need to beat click's decorators.
@@ -456,8 +457,9 @@ def repl_serial_to_stdout(serial):
                     data = serial.read(1)
 
                     if data != b'':
-                        print(data.replace(b"\r", b"").decode(), end = "")
-                        sys.stdout.flush()
+                        if serial_out_put_enable:
+                            print(data.replace(b"\r", b"").decode(), end = "")
+                            sys.stdout.flush()
                     else:
                         serial.write(hexsend(data))
 
@@ -494,16 +496,22 @@ def repl_serial_to_stdout(serial):
 def repl(query_is_rtt = None):
 
     global serial_reader_running
+    global serial_out_put_enable
     serial_reader_running = True
 
     _board.get_board_identity()
 
     if query_is_rtt != None:
 
-        if(_board.is_rtt_micropython()):
+        if _board.is_rtt_micropython():
             print("Yes: This is a rt-thread mpy board")
         else:
             print("No: This is not a rt-thread mpy board")
+
+        if _board.is_have_uos():
+            print("Yes: The uos module has been enableded")
+        else:
+            print("No: The uos module is not enabled")
 
         return
 
@@ -519,6 +527,12 @@ def repl(query_is_rtt = None):
 
         while True:
             char = getch()
+
+            if char == b'\xe8':
+                serial_out_put_enable = False
+
+            if char == b'\xe9':
+                serial_out_put_enable = True
 
             if char == b'\x00':
                 continue

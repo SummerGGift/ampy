@@ -30,7 +30,8 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 # 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
 # 此时如果选择的端口不是一个 mpy 开发板，将会报出异常 Error: This not a MicroPython board no bytes
 python cli.py -p COM18 repl
-python cli.py -p COM18 repl -q rtt          # 查询该开发板是否使用了 RT-Thread 固件，如果是则打印 Yes，没有使用则打印 No。
+# 查询该开发板是否使用了 RT-Thread 固件，如果是则打印 Yes，没有使用则打印 No。在进行 repl 连接时，可以先调用此接口判断该开发板是否烧录有 MPY 固件，以及是否是 RT-Thread 固件，从而判断出该应该使用怎样的文件同步策略来操作文件同步
+python cli.py -p COM18 repl -q rtt          
 python cli.py -p COM18 ls                   # 打印出开发板上 / 目录中的文件列表
 python cli.py -p COM18 ls /scripts          # 打印出开发板上 /scripts 文件夹中的文件列表
 python cli.py -p COM18 ls -r                # 递归打印出 / 目录中文件列表

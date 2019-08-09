@@ -72,6 +72,10 @@ python .\cli.py -p "query" sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsy
 
 如果不需要文件同步，则会收到返回值 `<no need to sync>`。
 
+## 关闭 repl 命令行回显的方法
+
+向串口发送 b'\xe8' 字符将会关闭回显功能，向串口发送 b'\xe9' 将会重新打开回显功能。该功能可用在按下 `CTRL + E` 进入粘贴模式前，关闭回显，使得输入的内容不显示在终端上。
+
 ### exe 打包命令
 
-`    pyinstaller.exe -F .\cli.py -p ampy`
+`pyinstaller.exe -F .\cli.py -p ampy`

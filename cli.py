@@ -503,10 +503,15 @@ def repl(query_is_rtt = None):
 
     if query_is_rtt != None:
 
-        if(_board.is_rtt_micropython()):
+        if _board.is_rtt_micropython():
             print("Yes: This is a rt-thread mpy board")
         else:
             print("No: This is not a rt-thread mpy board")
+
+        if _board.is_have_uos():
+            print("Yes: The uos module has been enableded")
+        else:
+            print("No: The uos module is not enabled")
 
         return
 

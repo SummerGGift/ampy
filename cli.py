@@ -480,12 +480,32 @@ def repl_serial_to_stdout(serial):
             serial.close()
 
 @cli.command()
-def repl():
+@click.option(
+    "--query_is_rtt",
+    "-q",
+    envvar="query_is_rtt",
+    # required=True,
+    default=None,
+    type=click.STRING,
+    help="Query whether the development board is an RTT development board",
+    metavar="query_is_rtt",
+)
+
+def repl(query_is_rtt = None):
 
     global serial_reader_running
     serial_reader_running = True
 
     _board.get_board_identity()
+
+    if query_is_rtt != None:
+
+        if(_board.is_rtt_micropython()):
+            print("Yes: This is a rt-thread mpy board")
+        else:
+            print("No: This is not a rt-thread mpy board")
+
+        return
 
     serial = _board.serial
 

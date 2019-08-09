@@ -218,6 +218,11 @@ class Pyboard:
             self.serial.read(n)
             n = self.serial.inWaiting()
 
+        try:
+            data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
+        except:
+            raise PyboardError('Error: This not a MicroPython board no bytes')
+
         self.serial.write(b'\r\x01') # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')
         if not data.endswith(b'raw REPL; CTRL-B to exit\r\n>'):

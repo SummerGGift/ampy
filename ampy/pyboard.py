@@ -205,6 +205,17 @@ class Pyboard:
 
         return True
 
+    def is_rtt_micropython(self):
+        try:
+            data = self.read_until(1, b'RT-Thread', timeout=0.1)
+        except:
+            raise PyboardError('Error: This not a MicroPython board no bytes')
+
+        if data.endswith(b'RT-Thread'):
+            return True
+        else:
+            return False
+
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
         if _rawdelay > 0:
@@ -217,6 +228,11 @@ class Pyboard:
         while n > 0:
             self.serial.read(n)
             n = self.serial.inWaiting()
+
+        try:
+            data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
+        except:
+            raise PyboardError('Error: This not a MicroPython board no bytes')
 
         self.serial.write(b'\r\x01') # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')

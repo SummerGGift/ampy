@@ -27,17 +27,21 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 ### MicroPython 开发板通用命令
 
 ```python
-python cli.py -p COM18 repl              # 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
-python cli.py -p COM18 ls                # 打印出开发板上 / 目录中的文件列表
-python cli.py -p COM18 ls /scripts       # 打印出开发板上 /scripts 文件夹中的文件列表
-python cli.py -p COM18 ls -r             # 递归打印出 / 目录中文件列表
-python cli.py -p COM18 mkdir dir_name    # 创建文件夹，名为 dir_name
-python cli.py -p COM18 rmdir dir_name    # 递归地删除 dir_name 文件夹中的所有文件，最终删除文件夹
-python cli.py -p COM18 rm filename       # 可以用来删除某个特定文件或者空文件夹
-python cli.py -p COM18 run xx.py         # 在开发板上执行本地目录下的 xx.py 文件
-python cli.py -p COM18 get xx.py xx.py   # 从开发板中获取 xx.py 到本地，并将该文件命名为 xx.py
-python cli.py -p COM18 put xx.py xx.py   # 注意写入的文件必须是 unix 格式，否则读出时会出问题
-python cli.py -p COM18 put local remote  # 将本地的 local 推送到开发板上，并且命名为 remote
+# 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
+# 此时如果选择的端口不是一个 mpy 开发板，将会报出异常 Error: This not a MicroPython board no bytes
+python cli.py -p COM18 repl
+# 查询该开发板是否使用了 RT-Thread 固件，如果是则打印 Yes，没有使用则打印 No。在进行 repl 连接时，可以先调用此接口判断该开发板是否烧录有 MPY 固件，以及是否是 RT-Thread 固件，从而判断出该应该使用怎样的文件同步策略来操作文件同步
+python cli.py -p COM18 repl -q rtt          
+python cli.py -p COM18 ls                   # 打印出开发板上 / 目录中的文件列表
+python cli.py -p COM18 ls /scripts          # 打印出开发板上 /scripts 文件夹中的文件列表
+python cli.py -p COM18 ls -r                # 递归打印出 / 目录中文件列表
+python cli.py -p COM18 mkdir dir_name       # 创建文件夹，名为 dir_name
+python cli.py -p COM18 rmdir dir_name       # 递归地删除 dir_name 文件夹中的所有文件，最终删除文件夹
+python cli.py -p COM18 rm filename          # 可以用来删除某个特定文件或者空文件夹
+python cli.py -p COM18 run xx.py            # 在开发板上执行本地目录下的 xx.py 文件
+python cli.py -p COM18 get xx.py xx.py      # 从开发板中获取 xx.py 到本地，并将该文件命名为 xx.py
+python cli.py -p COM18 put xx.py xx.py      # 注意写入的文件必须是 unix 格式，否则读出时会出问题
+python cli.py -p COM18 put local remote     # 将本地的 local 推送到开发板上，并且命名为 remote
 python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文件，注意如果该程序不返回，则程序无法从终端返回
 ```
 

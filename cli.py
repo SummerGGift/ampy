@@ -528,11 +528,13 @@ def repl(query_is_rtt = None):
         while True:
             char = getch()
 
-            if char == b'\xe8':
+            if char == b'\x07':
                 serial_out_put_enable = False
+                continue
 
-            if char == b'\xe9':
+            if char == b'\x08':
                 serial_out_put_enable = True
+                continue
 
             if char == b'\x00':
                 continue

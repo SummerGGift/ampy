@@ -532,7 +532,7 @@ def repl(query_is_rtt = None):
                 serial_out_put_enable = False
                 continue
 
-            if char == b'\x09':
+            if char == b'\x0F':
                 serial_out_put_enable = True
                 continue
 

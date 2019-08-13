@@ -499,9 +499,9 @@ def repl(query_is_rtt = None):
     global serial_out_put_enable
     serial_reader_running = True
 
-    _board.get_board_identity()
-
     if query_is_rtt != None:
+
+        _board.get_board_identity()
 
         if _board.is_rtt_micropython():
             print("Yes: This is a rt-thread mpy board")

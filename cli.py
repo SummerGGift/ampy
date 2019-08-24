@@ -458,7 +458,7 @@ def repl_serial_to_stdout(serial):
 
                     if data != b'':
                         if serial_out_put_enable:
-                            print(data.replace(b"\r", b"").decode(), end = "")
+                            sys.stdout.buffer.write(data.replace(b"\r", b""))
                             sys.stdout.flush()
                     else:
                         serial.write(hexsend(data))

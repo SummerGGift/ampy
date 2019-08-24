@@ -54,6 +54,7 @@ class CliError(BaseException):
     pass
 
 _board = None
+_system = None
 
 def windows_full_port_name(portname):
     # Helper function to generate proper Windows COM port paths.  Apparently
@@ -105,6 +106,13 @@ def cli(port, baud, delay):
     scripts.
     """
     global _board
+    global _system
+
+    if platform.system() == "Windows":
+        _system = "Windows"
+
+    if platform.system() == "Linux":
+        _system = "Linux"
 
     if port != "query":
         # On Windows fix the COM port path name for ports above 9 (see comment in
@@ -445,6 +453,8 @@ def reset(mode):
 
 def repl_serial_to_stdout(serial):
 
+    global _system
+
     def hexsend(string_data=''):
         hex_data = string_data.decode("hex")
         return hex_data
@@ -458,7 +468,10 @@ def repl_serial_to_stdout(serial):
 
                     if data != b'':
                         if serial_out_put_enable:
-                            sys.stdout.buffer.write(data.replace(b"\r", b""))
+                            if _system == "Linux":
+                                sys.stdout.buffer.write(data)
+                            else:
+                                sys.stdout.buffer.write(data.replace(b"\r", b""))
                             sys.stdout.flush()
                     else:
                         serial.write(hexsend(data))

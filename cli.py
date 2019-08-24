@@ -458,7 +458,7 @@ def repl_serial_to_stdout(serial):
 
                     if data != b'':
                         if serial_out_put_enable:
-                            print(data.replace(b"\r", b"").decode(), end = "")
+                            sys.stdout.buffer.write(data.replace(b"\r", b""))
                             sys.stdout.flush()
                     else:
                         serial.write(hexsend(data))
@@ -499,9 +499,9 @@ def repl(query_is_rtt = None):
     global serial_out_put_enable
     serial_reader_running = True
 
-    _board.get_board_identity()
-
     if query_is_rtt != None:
+
+        _board.get_board_identity()
 
         if _board.is_rtt_micropython():
             print("Yes: This is a rt-thread mpy board")
@@ -528,11 +528,13 @@ def repl(query_is_rtt = None):
         while True:
             char = getch()
 
-            if char == b'\xe8':
+            if char == b'\x07':
                 serial_out_put_enable = False
+                continue
 
-            if char == b'\xe9':
+            if char == b'\x0F':
                 serial_out_put_enable = True
+                continue
 
             if char == b'\x00':
                 continue

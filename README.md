@@ -90,3 +90,7 @@ python cli.py -p "query" sync -l "/home/summergift/work/ampy/tests" -i "file_inf
 ### exe 打包命令
 
 `pyinstaller.exe -F .\cli.py -p ampy`
+
+### linux 下打包命令
+
+`pyinstaller -F cli.py -p ampy`

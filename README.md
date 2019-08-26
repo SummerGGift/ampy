@@ -94,3 +94,9 @@ python cli.py -p "query" sync -l "/home/summergift/work/ampy/tests" -i "file_inf
 ### linux 下打包命令
 
 `pyinstaller -F cli.py -p ampy`
+
+### linux 下将当前用话加入到 dialout 用户组
+
+执行下面的命令，当使用 your_username 进行串口操作时，就不需要再输入 sudo 来频繁获取权限了。
+
+`sudo usermod -aG dialout your_username`

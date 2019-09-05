@@ -460,11 +460,17 @@ def repl_serial_to_stdout(serial):
         return hex_data
 
     try:
+        data = b''
         while serial_reader_running:
             count = serial.inWaiting()
             if count > 0:
                 try:
-                    data = serial.read(1)
+                    data += serial.read(count)
+
+                    try:
+                        data.decode()
+                    except UnicodeDecodeError:
+                        continue
 
                     if data != b'':
                         if serial_out_put_enable:
@@ -472,9 +478,11 @@ def repl_serial_to_stdout(serial):
                                 sys.stdout.buffer.write(data)
                             else:
                                 sys.stdout.buffer.write(data.replace(b"\r", b""))
-                            sys.stdout.flush()
+                            sys.stdout.buffer.flush()
                     else:
                         serial.write(hexsend(data))
+
+                    data = b''
 
                 except serial.serialutil.SerialException:
                     # This happens if the pyboard reboots, or a USB port

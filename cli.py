@@ -503,39 +503,11 @@ def repl_serial_to_stdout(serial):
             serial.close()
 
 @cli.command()
-@click.option(
-    "--query_is_rtt",
-    "-q",
-    envvar="query_is_rtt",
-    # required=True,
-    default=None,
-    type=click.STRING,
-    help="Query whether the development board is an RTT development board",
-    metavar="query_is_rtt",
-)
-
-def repl(query_is_rtt = None):
+def repl():
 
     global serial_reader_running
     global serial_out_put_enable
     serial_reader_running = True
-
-    if query_is_rtt != None:
-
-        _board.get_board_identity()
-
-        if _board.is_rtt_micropython():
-            print("Yes: This is a rt-thread mpy board")
-        else:
-            print("No: This is not a rt-thread mpy board")
-
-        if _board.is_have_uos():
-            print("Yes: The uos module has been enableded")
-        else:
-            print("No: The uos module is not enabled")
-
-        return
-
     serial = _board.serial
 
     repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')
@@ -630,18 +602,7 @@ def repl(query_is_rtt = None):
     metavar="info_pathname",
 )
 
-@click.option(
-    "--query",
-    "-q",
-    envvar="query",
-    # required=True,
-    default=None,
-    type=click.STRING,
-    help="query",
-    metavar="query",
-)
-
-def sync(local_path, remote_path = None, info_pathname = None, query = None):
+def sync(local_path, remote_path = None, info_pathname = None):
     def _sync_file(sync_info, local, remote = None):
         local = local.replace('\\', '/')
         delete_file_list = sync_info["delete"]

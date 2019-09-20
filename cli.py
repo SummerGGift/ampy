@@ -643,9 +643,7 @@ def repl(query_is_rtt = None):
 
 def sync(local_path, remote_path = None, info_pathname = None, query = None):
     def _sync_file(sync_info, local, remote = None):
-
         local = local.replace('\\', '/')
-
         delete_file_list = sync_info["delete"]
         sync_file_list = sync_info["sync"]
 
@@ -689,41 +687,46 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
         for item in delete_file_list:
             board_files.rm(item)
 
-    if info_pathname == None:
-        info_pathname = "file_info.json"
+    # check repl rtt uos
+    _board.get_board_identity()
 
-    if not os.path.exists(info_pathname):
-        if query == "ifneedsync":
-            print("file need sync")
-            return
+    if not _board.is_have_uos():
+        raise PyboardError('Error: The uos module is not enabled')
 
-        # List each file/directory on a separate line.
-        board_files = files.Files(_board)
-        board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
+    if _board.is_rtt_micropython():
+        # ready to sync
+        if info_pathname == None:
+            info_pathname = "file_info.json"
 
-    # Gets file synchronization information
-    sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
-    
-    # print(sync_info)
-    # print(pc_file_info)
+        if not os.path.exists(info_pathname):
+            # List each file/directory on a separate line.
+            board_files = files.Files(_board)
+            board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
 
-    if query == "ifneedsync":
+        # Gets file synchronization information
+        sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
+
         if sync_info['delete'] == [] and sync_info['sync'] == []:
             print("<no need to sync>")
             return
 
-    if query == "ifneedsync":
-        return
+        try:
+            # Perform file synchronization
+            _sync_file(sync_info, local_path)
+        except:
+            raise CliError("error: _file_sync failed, please restart and retry.")
 
-    try:
-        # Perform file synchronization
-        _sync_file(sync_info, local_path)
-    except:
-        raise CliError("error: _file_sync failed, please restart and retry.")
+        # After successful file synchronization, update the local cache file information
+        with open(info_pathname, 'w') as f:
+            f.write(str(pc_file_info))
+    else:
+        # File copy, open the file and copy its contents to the board.
+        # Put the file on the board.
+        remote = os.path.basename(local_path)
+        with open(local_path, "rb") as infile:
+            board_files = files.Files(_board)
+            board_files.put(remote, infile.read())
 
-    # After successful file synchronization, update the local cache file information
-    with open(info_pathname, 'w') as f:
-        f.write(str(pc_file_info))
 
 if __name__ == "__main__":
     try:

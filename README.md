@@ -55,33 +55,23 @@ python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文�
 ```python
 python cli.py -p COM18 ls -r -l
 ```
-设备文件同步执行如下命令。
+设备文件同步执行如下命令，执行文件夹同步时：
 
 ```python
 python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
 ```
 
-- `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址
+执行文件同步时：
+
+```python
+python cli.py -p com18 sync -l "G:\ampy\scripts\file_name" -i "G:\file_info"
+```
+
+- `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址或者是文件地址
 
 - `-i` 参数后面**设备文件系统中文件列表，缓存在本地的存储文件**
 
   对每一个开发板需要指定一个新的文件，否则会导致无法正确同步文件，如果不能确定指定的缓存文件是否正确，可以删除掉本地的缓存文件，并重新指定一个新的文件地址，同步代码会重新从设备文件系统中读取先关信息，并写入到这个文件里。
-
-查询是否需要文件同步。
-
-windows 下命令如下：
-
-```
-python .\cli.py -p "query" sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsync"
-```
-
-Linux 下命令如下：
-
-```
-python cli.py -p "query" sync -l "/home/summergift/work/ampy/tests" -i "file_info" -q "ifneedsync"
-```
-
-如果不需要文件同步，则会收到返回值 `<no need to sync>`。
 
 ## 关闭 repl 命令行回显的方法
 

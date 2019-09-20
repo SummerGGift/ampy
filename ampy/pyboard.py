@@ -206,6 +206,8 @@ class Pyboard:
         return True
 
     def is_rtt_micropython(self):
+        # Check if the development board has burned the rt-thread version of micropython firmware
+        self.serial.write(b'\x02')
         try:
             data = self.read_until(1, b'RT-Thread', timeout=0.1)
         except:
@@ -217,7 +219,7 @@ class Pyboard:
             return False
 
     def is_have_uos(self):
-        
+        # Check whether the uos module is enabled
         self.serial.write(b'\rimport uos\r')
         data = self.read_until(1, b'module not found', timeout=0.1)
 

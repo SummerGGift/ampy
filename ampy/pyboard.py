@@ -214,8 +214,10 @@ class Pyboard:
             raise PyboardError('Error: This not a MicroPython board no bytes')
 
         if data.endswith(b'RT-Thread'):
+            print("message: this is a rt-thread version micropython")
             return True
         else:
+            print("message: this is not a rt-thread version micropython")
             return False
 
     def is_have_uos(self):

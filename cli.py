@@ -581,6 +581,17 @@ def repl():
 )
 
 @click.option(
+    "--file_pathname",
+    "-f",
+    envvar="file_pathname",
+    required=True,
+    default=0,
+    type=click.STRING,
+    help="file pathname",
+    metavar="file_pathname",
+)
+
+@click.option(
     "--remote_path",
     "-r",
     envvar="remote_path",
@@ -613,7 +624,7 @@ def repl():
     metavar="query",
 )
 
-def sync(local_path, remote_path = None, info_pathname = None, query = None):
+def sync(local_path, file_pathname, remote_path = None, info_pathname = None, query = None):
     def _sync_file(sync_info, local, remote = None):
         local = local.replace('\\', '/')
         delete_file_list = sync_info["delete"]
@@ -707,8 +718,8 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
     else:
         # File copy, open the file and copy its contents to the board.
         # Put the file on the board.
-        remote = os.path.basename(local_path)
-        with open(local_path, "rb") as infile:
+        remote = os.path.basename(file_pathname)
+        with open(file_pathname, "rb") as infile:
             board_files = files.Files(_board)
             board_files.put(remote, infile.read())
 

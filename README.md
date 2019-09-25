@@ -45,24 +45,37 @@ python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文�
 
 ### RT-Thread 固件专用命令
 
+#### 打印设备中的文件信息
 递归打印出设备指定目录下的文件列表、大小、md5 值，如果没有指定目录，默认为根目录。
 
 ```python
 python cli.py -p COM18 ls -r -l
 ```
-设备文件同步执行如下命令，执行文件夹同步时：
+#### 查询是否需要文件同步
+
+windows 下命令如下：
+
+  ```
+python .\cli.py -p "query" sync -l "G:\ampy\ampy" -f "G:\ampy\scripts\file_name" -i "G:\file_info" -q "ifneedsync"
+  ```
+
+Linux 下命令如下：
+
+  ```
+python cli.py -p "query" sync -l "dirpath" -f "file_pathname" -i "file_info" -q "ifneedsync"
+  ```
+
+如果不需要文件同步，则会收到返回值 `<no need to sync>`。
+
+#### 执行文件夹或者文件同步同步时
 
 ```python
-python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
+python cli.py -p com18 sync -l "G:\ampy\scripts" -f "G:\ampy\scripts\file_name" -i "G:\file_info"
 ```
 
-执行文件同步时：
+- `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址
 
-```python
-python cli.py -p com18 sync -l "G:\ampy\scripts\file_name" -i "G:\file_info"
-```
-
-- `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址或者是文件地址
+- `-f` 参数后面跟想要同步到远端根目录的本地文件 pathname
 
 - `-i` 参数后面**设备文件系统中文件列表，缓存在本地的存储文件**
 

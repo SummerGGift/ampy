@@ -602,7 +602,18 @@ def repl():
     metavar="info_pathname",
 )
 
-def sync(local_path, remote_path = None, info_pathname = None):
+@click.option(
+    "--query",
+    "-q",
+    envvar="query",
+    # required=True,
+    default=None,
+    type=click.STRING,
+    help="query",
+    metavar="query",
+)
+
+def sync(local_path, remote_path = None, info_pathname = None, query = None):
     def _sync_file(sync_info, local, remote = None):
         local = local.replace('\\', '/')
         delete_file_list = sync_info["delete"]
@@ -647,6 +658,19 @@ def sync(local_path, remote_path = None, info_pathname = None):
         # delete files
         for item in delete_file_list:
             board_files.rm(item)
+
+    # check if need sync
+    if query == "ifneedsync":
+        if not os.path.exists(info_pathname):
+            print("<file need sync>")
+        else:
+            # Gets file synchronization information
+            sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
+            if sync_info['delete'] == [] and sync_info['sync'] == []:
+                print("<no need to sync>")
+            else:
+                print("<file need sync>")
+        return
 
     # check repl rtt uos
     _board.get_board_identity()

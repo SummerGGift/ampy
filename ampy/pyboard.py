@@ -189,17 +189,17 @@ class Pyboard:
         try:
             data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         if not data.endswith(b'\x3E\x3E\x3E'):
-            raise PyboardError('Error: This not a MicroPython board >>>')
+            raise PyboardError('Error: This is not a MicroPython board >>>')
 
         self.serial.write(b'\r\x01')  # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')
 
         if not data.endswith(b'raw REPL; CTRL-B to exit\r\n>'):
             print("get rew REPL... data:%s", data)
-            raise PyboardError('Error: This not a MicroPython board CA + CB')
+            raise PyboardError('Error: This is not a MicroPython board CA + CB')
         else:
             self.serial.write(b'\x02')
 
@@ -211,7 +211,7 @@ class Pyboard:
         try:
             data = self.read_until(1, b'RT-Thread', timeout=0.1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         if data.endswith(b'RT-Thread'):
             print("message: this is a rt-thread version micropython")
@@ -246,7 +246,7 @@ class Pyboard:
         try:
             data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         self.serial.write(b'\r\x01') # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')

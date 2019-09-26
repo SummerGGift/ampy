@@ -503,11 +503,26 @@ def repl_serial_to_stdout(serial):
             serial.close()
 
 @cli.command()
-def repl():
+@click.option(
+    "--query",
+    "-q",
+    envvar="query_is_can_be_connected",
+    # required=True,
+    default=None,
+    type=click.STRING,
+    help="Query whether the com port can be connected",
+    metavar="query",
+)
+
+def repl(query = None):
 
     global serial_reader_running
     global serial_out_put_enable
     serial_reader_running = True
+
+    if query != None:
+        return
+
     serial = _board.serial
 
     repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')

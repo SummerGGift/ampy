@@ -230,6 +230,11 @@ class Pyboard:
         else:
             return True
 
+    def soft_reset_board(self):
+        # board soft reset
+        self.serial.write(b'\x04')
+        time.sleep(0.1)
+
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
         if _rawdelay > 0:

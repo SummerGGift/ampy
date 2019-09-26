@@ -738,6 +738,7 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
             board_files = files.Files(_board)
             board_files.put(remote, infile.read())
 
+    _board.soft_reset_board()
 
 if __name__ == "__main__":
     try:

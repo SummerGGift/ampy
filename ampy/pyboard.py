@@ -235,6 +235,10 @@ class Pyboard:
         self.serial.write(b'\x04')
         time.sleep(0.1)
 
+    def read_until_hit(self):
+        data = self.read_until(1, b'\x3E\x3E\x3E', timeout=3)
+        return
+
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
         if _rawdelay > 0:

@@ -524,6 +524,8 @@ def repl(query = None):
     if query != None:
         return
 
+    _board.read_until_hit()
+
     serial = _board.serial
 
     repl_thread = threading.Thread(target = repl_serial_to_stdout, args=(serial,), name='REPL_serial_to_stdout')

@@ -467,10 +467,11 @@ def repl_serial_to_stdout(serial):
                 try:
                     data += serial.read(count)
 
-                    try:
-                        data.decode()
-                    except UnicodeDecodeError:
-                        continue
+                    if len(data) < 20:
+                        try:
+                            data.decode()
+                        except UnicodeDecodeError:
+                            continue
 
                     if data != b'':
                         if serial_out_put_enable:

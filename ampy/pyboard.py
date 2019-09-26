@@ -236,7 +236,7 @@ class Pyboard:
         time.sleep(0.1)
 
     def read_until_hit(self):
-        data = self.read_until(1, b'\x3E\x3E\x3E', timeout=0.1)
+        data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
         return
 
     def enter_raw_repl(self):

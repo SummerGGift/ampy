@@ -30,11 +30,6 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 # 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
 # 此时如果选择的端口不是一个 mpy 开发板，将会报出异常 Error: This not a MicroPython board no bytes
 python cli.py -p COM18 repl
-
-# 查询该开发板是否使用了 RT-Thread 固件，如果是则打印 Yes，没有使用则打印 No。在进行 repl 连接时，可以先调用此接口判断该开发板是否烧录有 MPY 固件，以及是否是 RT-Thread 固件，从而判断出该应该使用怎样的文件同步策略来操作文件同步。
-# 同时会返回该固件是否开启了 uos 模块的反馈信息，如果开启了 uos 模块则返回 Yes: The uos module has been enableded，没有开启则返回 No: The uos module is not enabled
-python cli.py -p COM18 repl -q rtt
-
 python cli.py -p COM18 ls                   # 打印出开发板上 / 目录中的文件列表
 python cli.py -p COM18 ls /scripts          # 打印出开发板上 /scripts 文件夹中的文件列表
 python cli.py -p COM18 ls -r                # 递归打印出 / 目录中文件列表
@@ -50,38 +45,41 @@ python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文�
 
 ### RT-Thread 固件专用命令
 
+#### 打印设备中的文件信息
 递归打印出设备指定目录下的文件列表、大小、md5 值，如果没有指定目录，默认为根目录。
 
 ```python
 python cli.py -p COM18 ls -r -l
 ```
-设备文件同步执行如下命令。
+#### 查询是否需要文件同步
+
+windows 下命令如下：
+
+  ```
+python .\cli.py -p "query" sync -l "G:\ampy\ampy" -f "G:\ampy\scripts\file_name" -i "G:\file_info" -q "ifneedsync"
+  ```
+
+Linux 下命令如下：
+
+  ```
+python cli.py -p "query" sync -l "dirpath" -f "file_pathname" -i "file_info" -q "ifneedsync"
+  ```
+
+如果不需要文件同步，则会收到返回值 `<no need to sync>`。
+
+#### 执行文件夹或者文件同步同步时
 
 ```python
-python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
+python cli.py -p com18 sync -l "G:\ampy\scripts" -f "G:\ampy\scripts\file_name" -i "G:\file_info"
 ```
 
 - `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址
 
+- `-f` 参数后面跟想要同步到远端根目录的本地文件 pathname
+
 - `-i` 参数后面**设备文件系统中文件列表，缓存在本地的存储文件**
 
   对每一个开发板需要指定一个新的文件，否则会导致无法正确同步文件，如果不能确定指定的缓存文件是否正确，可以删除掉本地的缓存文件，并重新指定一个新的文件地址，同步代码会重新从设备文件系统中读取先关信息，并写入到这个文件里。
-
-查询是否需要文件同步。
-
-windows 下命令如下：
-
-```
-python .\cli.py -p "query" sync -l "G:\ampy\ampy" -i "G:\file_info" -q "ifneedsync"
-```
-
-Linux 下命令如下：
-
-```
-python cli.py -p "query" sync -l "/home/summergift/work/ampy/tests" -i "file_info" -q "ifneedsync"
-```
-
-如果不需要文件同步，则会收到返回值 `<no need to sync>`。
 
 ## 关闭 repl 命令行回显的方法
 

@@ -189,35 +189,39 @@ class Pyboard:
         try:
             data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         if not data.endswith(b'\x3E\x3E\x3E'):
-            raise PyboardError('Error: This not a MicroPython board >>>')
+            raise PyboardError('Error: This is not a MicroPython board >>>')
 
         self.serial.write(b'\r\x01')  # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')
 
         if not data.endswith(b'raw REPL; CTRL-B to exit\r\n>'):
             print("get rew REPL... data:%s", data)
-            raise PyboardError('Error: This not a MicroPython board CA + CB')
+            raise PyboardError('Error: This is not a MicroPython board CA + CB')
         else:
             self.serial.write(b'\x02')
 
         return True
 
     def is_rtt_micropython(self):
+        # Check if the development board has burned the rt-thread version of micropython firmware
+        self.serial.write(b'\x02')
         try:
             data = self.read_until(1, b'RT-Thread', timeout=0.1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         if data.endswith(b'RT-Thread'):
+            print("message: this is a rt-thread version micropython")
             return True
         else:
+            print("message: this is not a rt-thread version micropython")
             return False
 
     def is_have_uos(self):
-        
+        # Check whether the uos module is enabled
         self.serial.write(b'\rimport uos\r')
         data = self.read_until(1, b'module not found', timeout=0.1)
 
@@ -225,6 +229,15 @@ class Pyboard:
             return False
         else:
             return True
+
+    def soft_reset_board(self):
+        # board soft reset
+        self.serial.write(b'\x04')
+        time.sleep(0.1)
+
+    def read_until_hit(self):
+        data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
+        return
 
     def enter_raw_repl(self):
         # Brief delay before sending RAW MODE char if requests
@@ -242,7 +255,7 @@ class Pyboard:
         try:
             data = self.read_until(1, b'\x3E\x3E\x3E', timeout=1)
         except:
-            raise PyboardError('Error: This not a MicroPython board no bytes')
+            raise PyboardError('Error: This is not a MicroPython board no bytes')
 
         self.serial.write(b'\r\x01') # ctrl-A: enter raw REPL
         data = self.read_until(1, b'raw REPL; CTRL-B to exit\r\n>')

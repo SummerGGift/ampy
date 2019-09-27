@@ -467,10 +467,11 @@ def repl_serial_to_stdout(serial):
                 try:
                     data += serial.read(count)
 
-                    try:
-                        data.decode()
-                    except UnicodeDecodeError:
-                        continue
+                    if len(data) < 20:
+                        try:
+                            data.decode()
+                        except UnicodeDecodeError:
+                            continue
 
                     if data != b'':
                         if serial_out_put_enable:
@@ -504,37 +505,26 @@ def repl_serial_to_stdout(serial):
 
 @cli.command()
 @click.option(
-    "--query_is_rtt",
+    "--query",
     "-q",
-    envvar="query_is_rtt",
+    envvar="query_is_can_be_connected",
     # required=True,
     default=None,
     type=click.STRING,
-    help="Query whether the development board is an RTT development board",
-    metavar="query_is_rtt",
+    help="Query whether the com port can be connected",
+    metavar="query",
 )
 
-def repl(query_is_rtt = None):
+def repl(query = None):
 
     global serial_reader_running
     global serial_out_put_enable
     serial_reader_running = True
 
-    if query_is_rtt != None:
-
-        _board.get_board_identity()
-
-        if _board.is_rtt_micropython():
-            print("Yes: This is a rt-thread mpy board")
-        else:
-            print("No: This is not a rt-thread mpy board")
-
-        if _board.is_have_uos():
-            print("Yes: The uos module has been enableded")
-        else:
-            print("No: The uos module is not enabled")
-
+    if query != None:
         return
+
+    _board.read_until_hit()
 
     serial = _board.serial
 
@@ -609,6 +599,17 @@ def repl(query_is_rtt = None):
 )
 
 @click.option(
+    "--file_pathname",
+    "-f",
+    envvar="file_pathname",
+    required=True,
+    default=0,
+    type=click.STRING,
+    help="file pathname",
+    metavar="file_pathname",
+)
+
+@click.option(
     "--remote_path",
     "-r",
     envvar="remote_path",
@@ -641,11 +642,9 @@ def repl(query_is_rtt = None):
     metavar="query",
 )
 
-def sync(local_path, remote_path = None, info_pathname = None, query = None):
+def sync(local_path, file_pathname, remote_path = None, info_pathname = None, query = None):
     def _sync_file(sync_info, local, remote = None):
-
         local = local.replace('\\', '/')
-
         delete_file_list = sync_info["delete"]
         sync_file_list = sync_info["sync"]
 
@@ -689,41 +688,60 @@ def sync(local_path, remote_path = None, info_pathname = None, query = None):
         for item in delete_file_list:
             board_files.rm(item)
 
-    if info_pathname == None:
-        info_pathname = "file_info.json"
-
-    if not os.path.exists(info_pathname):
-        if query == "ifneedsync":
-            print("file need sync")
-            return
-
-        # List each file/directory on a separate line.
-        board_files = files.Files(_board)
-        board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
-
-    # Gets file synchronization information
-    sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
-    
-    # print(sync_info)
-    # print(pc_file_info)
-
+    # check if need sync
     if query == "ifneedsync":
+        if not os.path.exists(info_pathname):
+            print("<file need sync>")
+        else:
+            # Gets file synchronization information
+            sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
+            if sync_info['delete'] == [] and sync_info['sync'] == []:
+                print("<no need to sync>")
+            else:
+                print("<file need sync>")
+        return
+
+    # check repl rtt uos
+    _board.get_board_identity()
+
+    if not _board.is_have_uos():
+        raise PyboardError('Error: The uos module is not enabled')
+
+    if _board.is_rtt_micropython():
+        # ready to sync
+        if info_pathname == None:
+            info_pathname = "file_info.json"
+
+        if not os.path.exists(info_pathname):
+            # List each file/directory on a separate line.
+            board_files = files.Files(_board)
+            board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
+
+        # Gets file synchronization information
+        sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
+
         if sync_info['delete'] == [] and sync_info['sync'] == []:
             print("<no need to sync>")
             return
 
-    if query == "ifneedsync":
-        return
+        try:
+            # Perform file synchronization
+            _sync_file(sync_info, local_path)
+        except:
+            raise CliError("error: _file_sync failed, please restart and retry.")
 
-    try:
-        # Perform file synchronization
-        _sync_file(sync_info, local_path)
-    except:
-        raise CliError("error: _file_sync failed, please restart and retry.")
+        # After successful file synchronization, update the local cache file information
+        with open(info_pathname, 'w') as f:
+            f.write(str(pc_file_info))
+    else:
+        # File copy, open the file and copy its contents to the board.
+        # Put the file on the board.
+        remote = os.path.basename(file_pathname)
+        with open(file_pathname, "rb") as infile:
+            board_files = files.Files(_board)
+            board_files.put(remote, infile.read())
 
-    # After successful file synchronization, update the local cache file information
-    with open(info_pathname, 'w') as f:
-        f.write(str(pc_file_info))
+    _board.soft_reset_board()
 
 if __name__ == "__main__":
     try:

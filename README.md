@@ -1,6 +1,6 @@
-## Cli For RT-Thread MicroPython 
+## Tools For RT-Thread MicroPython 
 
-`RT-Thread MicroPython` 串口连接方式 `Cli` 命令行工具。
+本仓库为 `RT-Thread MicroPython` 串口命令行工具源代码，欢迎使用 [RT-Thread MicroPython](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 进行 MicroPython 项目开发。
 
 ## 安装方式
 

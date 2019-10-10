@@ -4,19 +4,7 @@
 
 ## 安装方式
 
-使用默认源安装依赖包：
-
-```
-python -m pip install -r requirements.txt
-```
-
-还可以使用国内镜像源安装依赖包：
-
-```
-python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
-```
-
-或者直接输入安装依赖命令：
+输入安装依赖命令：
 
 ```python
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv

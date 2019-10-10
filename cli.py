@@ -38,11 +38,11 @@ import time
 import hashlib
 import json
 
-from getch import getch
-from file_sync import file_sync_info
-
-serial_reader_running = None
-serial_out_put_enable = True
+from ampy.getch import getch
+from ampy.file_sync import file_sync_info
+import ampy.files as files
+import ampy.pyboard as pyboard
+from ampy.pyboard import stdout
 
 # Load AMPY_PORT et al from .ampy file
 # Performed here because we need to beat click's decorators.
@@ -50,15 +50,14 @@ config = dotenv.find_dotenv(filename=".ampy", usecwd=True)
 if config:
     dotenv.load_dotenv(dotenv_path=config)
 
-import ampy.files as files
-import ampy.pyboard as pyboard
-from ampy.pyboard import stdout
-
-class CliError(BaseException):
-    pass
+serial_reader_running = None
+serial_out_put_enable = True
 
 _board = None
 _system = None
+
+class CliError(BaseException):
+    pass
 
 def windows_full_port_name(portname):
     # Helper function to generate proper Windows COM port paths.  Apparently

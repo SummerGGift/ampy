@@ -37,11 +37,11 @@ import sys
 import time
 import hashlib
 import json
+import ampy.files as files
+import ampy.pyboard as pyboard
 
 from ampy.getch import getch
 from ampy.file_sync import file_sync_info
-import ampy.files as files
-import ampy.pyboard as pyboard
 from ampy.pyboard import stdout
 
 # Load AMPY_PORT et al from .ampy file

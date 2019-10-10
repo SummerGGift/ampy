@@ -19,6 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+#
+# Change Logs:
+# Date           Author       Notes
+# 2019-10-10     SummerGift   Improve the code architecture
+
 from __future__ import print_function
 import os
 import platform
@@ -32,7 +37,6 @@ import sys
 import time
 import hashlib
 import json
-
 
 from getch import getch
 from file_sync import file_sync_info

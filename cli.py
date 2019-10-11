@@ -42,6 +42,7 @@ import ampy.pyboard as pyboard
 
 from ampy.getch import getch
 from ampy.file_sync import file_sync_info
+from ampy.file_sync import _get_file_crc32
 from ampy.pyboard import stdout
 
 # Load AMPY_PORT et al from .ampy file
@@ -739,7 +740,25 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
     else:
         # File copy, open the file and copy its contents to the board.
         # Put the file on the board.
+
+        local_crc = _get_file_crc32(file_pathname)
         remote = os.path.basename(file_pathname)
+        board_files = files.Files(_board)
+
+        get_board_crc = board_files.init_sync(remote)
+
+        if get_board_crc:
+            on_board_crc = get_board_crc.decode().replace("\n","").replace("\r","")
+
+            print("file pathname: %s"%file_pathname)
+            print("local_crc: %s"%local_crc)
+            print("onboard_crc : %s"%on_board_crc)
+
+            if local_crc == on_board_crc:
+                print("<files have same crc value, don't need sync>")
+                return
+
+        print("<files don't have same crc value, need sync>")
         with open(file_pathname, "rb") as infile:
             board_files = files.Files(_board)
             board_files.put(remote, infile.read())

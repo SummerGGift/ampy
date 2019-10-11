@@ -243,6 +243,65 @@ class Files(object):
         self._pyboard.exec_("gc.collect()")
         self._pyboard.exit_raw_repl()
 
+    def init_sync(self, filename):
+        """Put crc clac func."""
+
+        # Calculates the CRC value of the file
+        command = """
+            try:
+                import os
+                import binascii
+            except ImportError:
+                import uos as os
+
+            os.stat('{0}')
+
+            def mycrc32(szString):
+                m_pdwCrc32Table = [0 for x in range(0, 256)]
+                dwPolynomial = 0xEDB88320
+                dwCrc = 0
+                for i in range(0, 255):
+                    dwCrc = i
+                    for j in [8, 7, 6, 5, 4, 3, 2, 1]:
+                        if dwCrc & 1:
+                            dwCrc = (dwCrc >> 1) ^ dwPolynomial
+                        else:
+                            dwCrc >>= 1
+                    m_pdwCrc32Table[i] = dwCrc
+                dwCrc32 = 0xFFFFFFFF
+                for i in szString:
+                    b = ord(i)
+                    dwCrc32 = ((dwCrc32) >> 8) ^ m_pdwCrc32Table[(b) ^ ((dwCrc32) & 0x000000FF)]
+                dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+                return '%x' % (dwCrc32)
+
+            with open('{0}', "rb") as infile:
+                ucrc = infile.read()
+                ucrc = binascii.b2a_base64(ucrc)
+                print(mycrc32(ucrc.decode()))
+        """.format(
+            filename
+        )
+
+        self._pyboard.enter_raw_repl()
+        try:
+            out = self._pyboard.exec_(textwrap.dedent(command), "ls")
+        except PyboardError as ex:
+            message = ex.args[2].decode("utf-8")
+            # Check if this is an OSError #2, i.e. file/directory doesn't exist
+            # and rethrow it as something more descriptive.
+            if message.find("OSError: [Errno 2] ENOENT") != -1:
+                # raise RuntimeError("No such file/directory: {0}".format(filename))
+                print("No such file/directory: {0}".format(filename))
+            else:
+                print(ex)
+
+            self._pyboard.exit_raw_repl()
+            return False
+
+        self._pyboard.exit_raw_repl()
+        return out
+
     def rm(self, filename):
         """Remove the specified file or directory."""
         command = """

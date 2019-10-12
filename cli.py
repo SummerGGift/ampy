@@ -53,6 +53,7 @@ if config:
 
 serial_reader_running = None
 serial_out_put_enable = True
+serial_out_put_count = 0
 
 _board = None
 _system = None
@@ -458,6 +459,7 @@ def reset(mode):
 def repl_serial_to_stdout(serial):
 
     global _system
+    global serial_out_put_count
 
     def hexsend(string_data=''):
         hex_data = string_data.decode("hex")
@@ -478,7 +480,7 @@ def repl_serial_to_stdout(serial):
                             continue
 
                     if data != b'':
-                        if serial_out_put_enable:
+                        if serial_out_put_enable and serial_out_put_count > 0:
                             if _system == "Linux":
                                 sys.stdout.buffer.write(data)
                             else:
@@ -488,6 +490,7 @@ def repl_serial_to_stdout(serial):
                         serial.write(hexsend(data))
 
                     data = b''
+                    serial_out_put_count += 1
 
                 except serial.serialutil.SerialException:
                     # This happens if the pyboard reboots, or a USB port
@@ -523,6 +526,10 @@ def repl(query = None):
 
     global serial_reader_running
     global serial_out_put_enable
+    global serial_out_put_count
+
+    serial_out_put_count = 1
+
     serial_reader_running = True
 
     if query != None:
@@ -549,6 +556,7 @@ def repl(query = None):
 
             if char == b'\x0F':
                 serial_out_put_enable = True
+                serial_out_put_count = 0
                 continue
 
             if char == b'\x00':

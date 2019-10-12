@@ -54,10 +54,12 @@ def get_file_crc32(file_path):
 def _get_file_crc32(file_path):
     import binascii
 
-    def mycrc32(szString):
+    def mycrc32(szString, dwCrc32):
         m_pdwCrc32Table = [0 for x in range(0, 256)]
         dwPolynomial = 0xEDB88320
         dwCrc = 0
+        dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+
         for i in range(0, 255):
             dwCrc = i
             for j in [8, 7, 6, 5, 4, 3, 2, 1]:
@@ -66,21 +68,23 @@ def _get_file_crc32(file_path):
                 else:
                     dwCrc >>= 1
             m_pdwCrc32Table[i] = dwCrc
-        dwCrc32 = 0xFFFFFFFF
+
         for i in szString:
             b = ord(i)
             dwCrc32 = ((dwCrc32) >> 8) ^ m_pdwCrc32Table[(b) ^ ((dwCrc32) & 0x000000FF)]
         dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
-        return '%x' % (dwCrc32)
+        return dwCrc32
 
-    try:
-        with open(file_path, "rb") as infile:
-            ucrc = infile.read()
+    with open(file_path, "rb") as infile:
+        file_crc_value = 0xFFFFFFFF
+        while True:
+            ucrc = infile.read(500)
+            if len(ucrc) == 0:
+                break
             ucrc = binascii.b2a_base64(ucrc)
-        return mycrc32(ucrc.decode())
-    except:
-        print("file crc calc error.\r\n")
-        return ''
+            file_crc_value = mycrc32(ucrc.decode(), file_crc_value)
+
+    return ('%x' % (file_crc_value))
 
 def get_pc_dir_info(path):
     result = []

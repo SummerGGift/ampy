@@ -39,15 +39,21 @@ python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文�
 ```python
 python cli.py -p COM18 ls -r -l
 ```
+#### 查询是否需要文件同步
+
+```
+python cli.py -p "query" sync -l "G:\sync_dir" -i "G:\file_list_cache" -q "ifneedsync"
+```
+
 #### 执行文件夹或者文件同步同步时
 
 ```python
-python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
+python cli.py -p com18 sync -l "G:\sync_dir" -i "G:\file_list_cache"
 ```
 
 - `-l` 参数后面跟想要同步到远端根目录的本地文件夹地址
 
-- `-i` 参数后面**设备文件系统中文件列表，缓存在本地的存储文件**
+- `-i` 参数后面 **设备文件系统中文件列表，缓存在本地的存储文件**
 
   对每一个开发板需要指定一个新的文件，否则会导致无法正确同步文件，如果不能确定指定的缓存文件是否正确，可以删除掉本地的缓存文件，并重新指定一个新的文件地址，同步代码会重新从设备文件系统中读取先关信息，并写入到这个文件里。
 
@@ -55,11 +61,11 @@ python cli.py -p com18 sync -l "G:\ampy\scripts" -i "G:\file_info"
 
 向串口发送 b'\xe8' 字符将会关闭回显功能，向串口发送 b'\xe9' 将会重新打开回显功能。该功能可用在按下 `CTRL + E` 进入粘贴模式前，关闭回显，使得输入的内容不显示在终端上。
 
-### exe 打包命令
+### Package cli on Windows
 
 `pyinstaller.exe -F .\cli.py -p ampy`
 
-### linux 下打包命令
+### Package cli on Linux
 
 `pyinstaller -F cli.py -p ampy`
 

@@ -86,7 +86,7 @@ def _get_file_crc32(file_path):
 
     return ('%x' % (file_crc_value))
 
-def get_pc_dir_info(path):
+def get_pc_dir_info(path, rtt_version):
     result = []
 
     for root, dirs, files in os.walk(path, topdown=False):
@@ -96,7 +96,10 @@ def get_pc_dir_info(path):
             file_key = os.path.join(root, name)[len(path) + 1:].replace('\\', '/')
             file_info['name'] = file_key
 
-            big_small = get_file_crc32(os.path.join(root, name)).upper()
+            if rtt_version:
+                big_small = get_file_crc32(os.path.join(root, name)).upper()
+            else:
+                big_small = _get_file_crc32(os.path.join(root, name)).upper()
 
             if len(big_small) == 8:
                 convert_value = big_small_end_convert(big_small).upper()
@@ -152,12 +155,12 @@ def get_sync_info(pc_info, dev_info):
     # print(sync_info)
     return sync_info
 
-def file_sync_info(local_path, info_pathname):
+def file_sync_info(local_path, info_pathname, rtt_version):
 
     pc_file_info = {}
     dev_file_info = {}
 
-    pc_info = get_pc_dir_info(local_path)
+    pc_info = get_pc_dir_info(local_path, rtt_version)
 
     for item in pc_info:
         pc_file_info[item["name"]] = item["md5"]

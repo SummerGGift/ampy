@@ -698,6 +698,8 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
 
         # delete files
         for item in delete_file_list:
+            # Delete the provided file/directory on the board.
+            board_files.rmdir(item, True)
             board_files.rm(item)
 
     # check if need sync
@@ -719,57 +721,66 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
     if not _board.is_have_uos():
         raise PyboardError('Error: The uos module is not enabled')
 
+    rtt_version_flag = False
     if _board.is_rtt_micropython():
-        # ready to sync
-        if info_pathname == None:
-            info_pathname = "file_info.json"
+        rtt_version_flag = True
 
-        if not os.path.exists(info_pathname):
-            # List each file/directory on a separate line.
-            board_files = files.Files(_board)
-            board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
+    # ready to sync
+    if info_pathname == None:
+        info_pathname = "file_info.json"
 
-        # Gets file synchronization information
-        sync_info, pc_file_info = file_sync_info(local_path, info_pathname)
-
-        if sync_info['delete'] == [] and sync_info['sync'] == []:
-            print("<no need to sync>")
-            return
-
-        try:
-            # Perform file synchronization
-            _sync_file(sync_info, local_path)
-        except:
-            raise CliError("error: _file_sync failed, please restart and retry.")
-
-        # After successful file synchronization, update the local cache file information
-        with open(info_pathname, 'w') as f:
-            f.write(str(pc_file_info))
-    else:
-        # File copy, open the file and copy its contents to the board.
-        # Put the file on the board.
-
-        local_crc = _get_file_crc32(file_pathname)
-        remote = os.path.basename(file_pathname)
+    if not os.path.exists(info_pathname):
+        # List each file/directory on a separate line.
         board_files = files.Files(_board)
+        board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
 
-        get_board_crc = board_files.init_sync(remote)
+    # Gets file synchronization information
+    sync_info, pc_file_info = file_sync_info(local_path, info_pathname, rtt_version_flag)
 
-        if get_board_crc:
-            on_board_crc = get_board_crc.decode().replace("\n","").replace("\r","")
+    # print("sync_info------------------------------")
+    # print(sync_info)
+    # print("pc_file_info------------------------------")
+    # print(pc_file_info)
 
-            print("file pathname: %s"%file_pathname)
-            print("local_crc: %s"%local_crc)
-            print("onboard_crc : %s"%on_board_crc)
+    if sync_info['delete'] == [] and sync_info['sync'] == []:
+        print("<no need to sync>")
+        return
 
-            if local_crc == on_board_crc:
-                print("<files have same crc value, don't need sync>")
-                return
+    try:
+        # Perform file synchronization
+        _sync_file(sync_info, local_path)
+    except:
+        raise CliError("error: _file_sync failed, please restart and retry.")
 
-        print("<files don't have same crc value, need sync>")
-        with open(file_pathname, "rb") as infile:
-            board_files = files.Files(_board)
-            board_files.put(remote, infile.read())
+    # After successful file synchronization, update the local cache file information
+    with open(info_pathname, 'w') as f:
+        f.write(str(pc_file_info))
+
+    # else:
+    #     # File copy, open the file and copy its contents to the board.
+    #     # Put the file on the board.
+
+    #     local_crc = _get_file_crc32(file_pathname)
+    #     remote = os.path.basename(file_pathname)
+    #     board_files = files.Files(_board)
+
+    #     get_board_crc = board_files.init_sync(remote)
+
+    #     if get_board_crc:
+    #         on_board_crc = get_board_crc.decode().replace("\n","").replace("\r","")
+
+    #         print("file pathname: %s"%file_pathname)
+    #         print("local_crc: %s"%local_crc)
+    #         print("onboard_crc : %s"%on_board_crc)
+
+    #         if local_crc == on_board_crc:
+    #             print("<files have same crc value, don't need sync>")
+    #             return
+
+    #     print("<files don't have same crc value, need sync>")
+    #     with open(file_pathname, "rb") as infile:
+    #         board_files = files.Files(_board)
+    #         board_files.put(remote, infile.read())
 
     _board.soft_reset_board()
 

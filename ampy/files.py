@@ -189,10 +189,13 @@ class Files(object):
                 r = []
                 for f in listdir('{0}'):
                     size = os.stat(f)[6]
-                    if os_crc_flag:
-                        md5 = os.file_crc32(f)
+                    if size == 0:
+                        md5 = "dir"
                     else:
-                        md5 = _get_file_crc32(f)
+                        if os_crc_flag:
+                            md5 = os.file_crc32(f)
+                        else:
+                            md5 = _get_file_crc32(f)
                     r.append('{{0}} - {{1}} - {{2}}'.format(f, size, md5))
                 print(r)
             """.format(
@@ -361,8 +364,11 @@ class Files(object):
                 import os
             except ImportError:
                 import uos as os
-            os.remove('{0}')
-            os.rmdir('{0}')
+
+            try:
+                os.remove('{0}')
+            except:
+                pass
         """.format(
             filename
         )
@@ -374,7 +380,8 @@ class Files(object):
             # Check if this is an OSError #2, i.e. file/directory doesn't exist
             # and rethrow it as something more descriptive.
             if message.find("OSError: [Errno 2] ENOENT") != -1:
-                raise RuntimeError("No such file/directory: {0}".format(filename))
+                # raise RuntimeError("No such file/directory: {0}".format(filename))
+                pass
             # Check for OSError #13, the directory isn't empty.
             if message.find("OSError: [Errno 13] EACCES") != -1:
                 raise RuntimeError("Directory is not empty: {0}".format(filename))

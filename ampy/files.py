@@ -145,10 +145,54 @@ class Files(object):
         # Execute os.listdir() command on the board.
         if long_format:
             command += """
+                def _get_file_crc32(file_path):
+                    import binascii
+
+                    def _calc_crc32(szString, dwCrc32):
+                        m_pdwCrc32Table = [0 for x in range(0, 256)]
+                        dwPolynomial = 0xEDB88320
+                        dwCrc = 0
+                        dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+
+                        for i in range(0, 255):
+                            dwCrc = i
+                            for j in [8, 7, 6, 5, 4, 3, 2, 1]:
+                                if dwCrc & 1:
+                                    dwCrc = (dwCrc >> 1) ^ dwPolynomial
+                                else:
+                                    dwCrc >>= 1
+                            m_pdwCrc32Table[i] = dwCrc
+
+                        for i in szString:
+                            b = ord(i)
+                            dwCrc32 = ((dwCrc32) >> 8) ^ m_pdwCrc32Table[(b) ^ ((dwCrc32) & 0x000000FF)]
+                        dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+                        return dwCrc32
+
+                    with open(file_path, "rb") as infile:
+                        file_crc_value = 0xFFFFFFFF
+                        while True:
+                            ucrc = infile.read(500)
+                            if len(ucrc) == 0:
+                                break
+                            ucrc = binascii.b2a_base64(ucrc)
+                            file_crc_value = _calc_crc32(ucrc.decode(), file_crc_value)
+
+                    return ('%x' % (file_crc_value))
+
+                try:
+                    os_crc_flag = True
+                    from os import file_crc32
+                except ImportError:
+                    os_crc_flag = False
+
                 r = []
                 for f in listdir('{0}'):
-                    size = os.stat(f)[6]  
-                    md5 = os.file_crc32(f)
+                    size = os.stat(f)[6]
+                    if os_crc_flag:
+                        md5 = os.file_crc32(f)
+                    else:
+                        md5 = _get_file_crc32(f)
                     r.append('{{0}} - {{1}} - {{2}}'.format(f, size, md5))
                 print(r)
             """.format(

@@ -700,7 +700,8 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
         for item in delete_file_list:
             # Delete the provided file/directory on the board.
             # board_files.rmdir(item, True)
-            board_files.rm(item)
+            if item != '':
+                board_files.rm(item)
 
     # check if need sync
     if query == "ifneedsync":

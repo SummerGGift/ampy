@@ -378,14 +378,18 @@ class Files(object):
                 os.chdir('..')
                 os.rmdir(directory)
 
+            file_name = '{0}'
+
             try:
-                size = os.stat('{0}')[6]
-                if size == 0:
-                    rmdir('{0}')
-                else:
-                    os.remove('{0}')
+                size = os.stat(file_name)[6]
             except:
-                os.remove('{0}')
+                file_name = '/' + file_name
+                size = os.stat(file_name)[6]
+
+            if size == 0:
+                rmdir(file_name)
+            else:
+                os.remove(file_name)
 
             gc.collect()
         """.format(

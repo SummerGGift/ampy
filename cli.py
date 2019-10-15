@@ -689,9 +689,8 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
         for item in sync_file_list:
             # File copy, open the file and copy its contents to the board.
             # Put the file on the board.
-
+            print("file to add:%s"%item)
             item_local = os.path.join(local_path, item).replace('\\', '/')
-
             with open(item_local, "rb") as infile:
                 board_files = files.Files(_board)
                 board_files.put(item, infile.read())
@@ -700,6 +699,7 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
         for item in delete_file_list:
             # Delete the provided file/directory on the board.
             # board_files.rmdir(item, True)
+            print("file to del:%s"%item)
             if item != '':
                 board_files.rm(item)
 

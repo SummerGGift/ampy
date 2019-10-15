@@ -148,8 +148,9 @@ class Files(object):
                 def _get_file_crc32(file_path):
                     import binascii
 
+                    m_pdwCrc32Table = [0 for x in range(0, 256)]
+
                     def _calc_crc32(szString, dwCrc32):
-                        m_pdwCrc32Table = [0 for x in range(0, 256)]
                         dwPolynomial = 0xEDB88320
                         dwCrc = 0
                         dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
@@ -185,6 +186,8 @@ class Files(object):
                     from os import file_crc32
                 except ImportError:
                     os_crc_flag = False
+
+                # from __sync import _get_file_crc32
 
                 r = []
                 for f in listdir('{0}'):

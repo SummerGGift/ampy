@@ -362,13 +362,32 @@ class Files(object):
         command = """
             try:
                 import os
+                import gc
             except ImportError:
                 import uos as os
 
+            def rmdir(directory):
+                os.chdir(directory)
+                for f in os.listdir():
+                    try:
+                        os.remove(f)
+                    except OSError:
+                        pass
+                for f in os.listdir():
+                    rmdir(f)
+                os.chdir('..')
+                os.rmdir(directory)
+
             try:
-                os.remove('{0}')
+                size = os.stat('{0}')[6]
+                if size == 0:
+                    rmdir('{0}')
+                else:
+                    os.remove('{0}')
             except:
-                pass
+                os.remove('{0}')
+
+            gc.collect()
         """.format(
             filename
         )

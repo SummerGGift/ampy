@@ -733,7 +733,7 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
     if not os.path.exists(info_pathname):
         # List each file/directory on a separate line.
         board_files = files.Files(_board)
-        board_files.ls(long_format=True, recursive=True, pathname = info_pathname)
+        board_files._ls_sync(long_format=True, recursive=True, pathname = info_pathname)
 
     # Gets file synchronization information
     sync_info, pc_file_info = file_sync_info(local_path, info_pathname, rtt_version_flag)

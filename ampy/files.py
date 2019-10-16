@@ -242,6 +242,181 @@ class Files(object):
         # Parse the result list and return it.
         return ast.literal_eval(out.decode("utf-8"))
 
+    def _ls_sync(self, directory="/", long_format=True, recursive=False, pathname=None):
+        """List the contents of the specified directory (or root if none is
+        specified).  Returns a list of strings with the names of files in the
+        specified directory.  If long_format is True then a list of 2-tuples
+        with the name and size (in bytes) of the item is returned.  Note that
+        it appears the size of directories is not supported by MicroPython and
+        will always return 0 (i.e. no recursive size computation).
+        """
+
+        # Make sure directory starts with slash, for consistency.
+        if not directory.startswith("/"):
+            directory = "/" + directory
+
+        command = """\
+                try:        
+                    import os
+                    import gc
+                    import sys
+                except ImportError:
+                    import uos as os
+                cwd_dir = os.getcwd()\n"""
+
+        if recursive:
+            command += """\
+                if sys.platform == "MaixPy":
+                    def listdir(directory):
+                        if directory == '/':
+                            gc.collect()
+                            return sorted([directory + f for f in os.listdir(directory)])
+                        else:
+                            gc.collect()
+                            return sorted([directory + '/' + f for f in os.listdir(directory)])
+                else:
+                    def listdir(directory):
+                        result = set()
+
+                        def _listdir(dir_or_file):
+                            try:
+                                # if its a directory, then it should provide some children.
+                                children = os.listdir(dir_or_file)
+                            except OSError:                        
+                                # probably a file. run stat() to confirm.
+                                os.stat(dir_or_file)
+                                result.add(dir_or_file) 
+                            else:
+                                # probably a directory, add to result if empty.
+                                if children:
+                                    # queue the children to be dealt with in next iteration.
+                                    for child in children:
+                                        # create the full path.
+                                        if dir_or_file == '/':
+                                            next = dir_or_file + child
+                                        else:
+                                            next = dir_or_file + '/' + child
+                                        
+                                        _listdir(next)
+                                else:
+                                    result.add(dir_or_file)                     
+
+                        _listdir(directory)
+                        gc.collect()
+                        return sorted(result)\n"""
+        else:
+            command += """\
+                def listdir(directory):
+                    if directory == '/':
+                        gc.collect()                
+                        return sorted([directory + f for f in os.listdir(directory)])
+                    else:
+                        gc.collect()
+                        return sorted([directory + '/' + f for f in os.listdir(directory)])\n"""
+
+        # Execute os.listdir() command on the board.
+        if long_format:
+            command += """
+                def _get_file_crc32(file_path):
+                    import binascii
+                    dwPolynomial = 0xEDB88320
+                    m_pdwCrc32Table = [0 for x in range(0, 256)]
+                    for i in range(0, 255):
+                        dwCrc = i
+                        for j in [8, 7, 6, 5, 4, 3, 2, 1]:
+                            if dwCrc & 1:
+                                dwCrc = (dwCrc >> 1) ^ dwPolynomial
+                            else:
+                                dwCrc >>= 1
+                        m_pdwCrc32Table[i] = dwCrc
+
+                    def _calc_crc32(szString, dwCrc32):
+                        dwCrc = 0
+                        dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+
+                        for i in szString:
+                            b = ord(i)
+                            dwCrc32 = ((dwCrc32) >> 8) ^ m_pdwCrc32Table[(b) ^ ((dwCrc32) & 0x000000FF)]
+                        dwCrc32 = dwCrc32 ^ 0xFFFFFFFF
+                        return dwCrc32
+
+                    with open(file_path, "rb") as infile:
+                        file_crc_value = 0xFFFFFFFF
+                        while True:
+                            ucrc = infile.read(200)
+                            if len(ucrc) == 0:
+                                break
+                            ucrc = binascii.b2a_base64(ucrc)
+                            file_crc_value = _calc_crc32(ucrc.decode(), file_crc_value)
+                            gc.collect()
+                    return ('%x' % (file_crc_value))
+
+                try:
+                    os_crc_flag = True
+                    from os import file_crc32
+                except ImportError:
+                    os_crc_flag = False
+
+                r = []
+                l = len(cwd_dir)
+
+                if cwd_dir != '/':
+                    l += 1
+
+                for f in listdir(cwd_dir):
+                    size = os.stat(f)[6]
+                    if size == 0:
+                        md5 = "dir"
+                    else:
+                        if os_crc_flag:
+                            md5 = os.file_crc32(f)
+                        else:
+                            md5 = _get_file_crc32(f)
+                    r.append('{{0}} - {{1}} - {{2}}'.format(f[l:], size, md5))
+                print(r)
+            """.format(
+                directory
+            )
+        else:
+            command += """
+                print(listdir(cwd_dir))
+            """.format(
+                directory
+            )
+        self._pyboard.enter_raw_repl()
+
+        if pathname == None:
+            pathname = "temp_file_info.json"
+
+        try:
+            out = self._pyboard.exec_(textwrap.dedent(command), "ls")
+
+            if long_format:
+                file_info = out.decode("utf-8")
+                info_end = file_info.find("]")
+                file_info = file_info.rstrip()[1:info_end].replace("\'","")
+
+                file_dict = {}
+
+                count = 0
+                while(count < len(file_info.split(", "))):
+                    file_dict[file_info.split(", ")[count].split(" - ")[0]] = file_info.split(", ")[count].split(" - ")[2]
+                    count += 1
+
+                with open(pathname, 'w') as f:
+                    f.write(str(file_dict))
+
+        except PyboardError as ex:
+            # Check if this is an OSError #2, i.e. directory doesn't exist and
+            # rethrow it as something more descriptive.
+            if ex.args[2].decode("utf-8").find("OSError: [Errno 2] ENOENT") != -1:
+                raise RuntimeError("No such directory: {0}".format(directory))
+            else:
+                raise ex
+        self._pyboard.exit_raw_repl()
+        # Parse the result list and return it.
+        return ast.literal_eval(out.decode("utf-8"))
+
     def mkdir(self, directory, exists_okay=False):
         """Create the specified directory.  Note this cannot create a recursive
         hierarchy of directories, instead each one should be created separately.

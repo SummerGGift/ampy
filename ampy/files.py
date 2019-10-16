@@ -403,9 +403,6 @@ class Files(object):
                     file_dict[file_info.split(", ")[count].split(" - ")[0]] = file_info.split(", ")[count].split(" - ")[2]
                     count += 1
 
-                with open(pathname, 'w') as f:
-                    f.write(str(file_dict))
-
         except PyboardError as ex:
             # Check if this is an OSError #2, i.e. directory doesn't exist and
             # rethrow it as something more descriptive.
@@ -414,6 +411,10 @@ class Files(object):
             else:
                 raise ex
         self._pyboard.exit_raw_repl()
+
+        with open(pathname, 'w') as f:
+            f.write(str(file_dict))
+
         # Parse the result list and return it.
         return ast.literal_eval(out.decode("utf-8"))
 

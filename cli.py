@@ -265,6 +265,7 @@ def put(local, remote):
     if os.path.isdir(local):
         # Directory copy, create the directory and walk all children to copy
         # over the files.
+        dir_del_flag = True
         board_files = files.Files(_board)
         for parent, child_dirs, child_files in os.walk(local):
             # Create board filesystem absolute path to parent directory.
@@ -272,6 +273,10 @@ def put(local, remote):
                 posixpath.join(remote, os.path.relpath(parent, local))
             )
             try:
+                # if dir already exist, remove that dir, only perform once.
+                if dir_del_flag:
+                    board_files.rmdir(remote_parent, missing_okay=True)
+                    dir_del_flag = False
                 # Create remote parent directory.
                 board_files.mkdir(remote_parent)
                 # Loop through all the files and put them on the board too.

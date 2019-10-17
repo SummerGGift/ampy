@@ -1,4 +1,4 @@
-## Tools For RT-Thread MicroPython 
+# Tools For RT-Thread MicroPython 
 
 本仓库为 `RT-Thread MicroPython` 串口命令行工具源代码，欢迎使用 [RT-Thread MicroPython](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 进行 MicroPython 项目开发。
 
@@ -7,39 +7,53 @@
 输入安装依赖命令：
 
 ```python
-python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv
+python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv pyinstaller
 ```
 
-## 使用方法
+## 功能介绍
 
-### MicroPython 开发板通用命令
+使用任何命令都需要指定本次操作的串口，例如 `python cli.py -p COM18` 的意思是对 COM18 串口的设备进行操作，后续所有的命令前也都需要添加该格式。
 
-```python
-# 在当前终端接入 MicroPython 的 repl，在终端使用 CTRL + X 退出 repl 模式
-# 此时如果选择的端口不是一个 mpy 开发板，将会报出异常 Error: This not a MicroPython board no bytes
-python cli.py -p COM18 repl
-python cli.py -p COM18 ls                   # 打印出开发板上 / 目录中的文件列表
-python cli.py -p COM18 ls /scripts          # 打印出开发板上 /scripts 文件夹中的文件列表
-python cli.py -p COM18 ls -r                # 递归打印出 / 目录中文件列表
-python cli.py -p COM18 mkdir dir_name       # 创建文件夹，名为 dir_name
-python cli.py -p COM18 rmdir dir_name       # 递归地删除 dir_name 文件夹中的所有文件，最终删除文件夹
-python cli.py -p COM18 rm filename          # 可以用来删除某个特定文件或者空文件夹
-python cli.py -p COM18 run xx.py            # 在开发板上执行本地目录下的 xx.py 文件
-python cli.py -p COM18 get xx.py xx.py      # 从开发板中获取 xx.py 到本地，并将该文件命名为 xx.py
-python cli.py -p COM18 put xx.py xx.py      # 注意写入的文件必须是 unix 格式，否则读出时会出问题
-python cli.py -p COM18 put local remote     # 将本地的 local 推送到开发板上，并且命名为 remote
-python cli.py -p com18 run none -d hello.py # 执行设备上的 `hello.py` 文件，注意如果该程序不返回，则程序无法从终端返回
-```
+### 进入 repl 模式
 
-### RT-Thread 固件专用命令
+连接串口并打开 repl 模式的命令如下：
 
-#### 打印设备中的文件信息
-递归打印出设备指定目录下的文件列表、大小、md5 值，如果没有指定目录，默认为根目录。
+- python cli.py -p COM18 repl
 
-```python
-python cli.py -p COM18 ls -r -l
-```
-#### 执行文件夹同步
+在当前终端接入 MicroPython 的 repl ，在终端使用 `ctrl +x` 退出 repl 模式。
+
+### 查询文件系统列表
+
+| 命令        | 功能                                       |
+| ----------- | ------------------------------------------ |
+| ls          | 打印出开发板上 / 目录中的文件列表          |
+| ls -r       | 递归打印出 / 目录中文件列表                |
+| ls -r -l    | 递归打印出 / 目录中文件列表以及 crc 校验值 |
+| ls /scripts | 打印出开发板上 /scripts 文件夹中的文件列表 |
+
+### 创建删除文件夹/文件
+| 命令           | 功能                                                   |
+| -------------- | ------------------------------------------------------ |
+| mkdir dir_name | 创建文件夹，名为 dir_name                              |
+| rmdir dir_name | 递归地删除 dir_name 文件夹中的所有文件，最终删除文件夹 |
+| rm filename    | 可以用来删除某个特定文件                               |
+
+### 文件传输操作
+
+| 命令                | 功能                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| get xx.py xx.py     | 从开发板中获取 xx.py 到本地，并将该文件命名为 xx.py        |
+| put xx.py xx.py     | 将本地文件传入到开发板中（注意写入的文件必须是 unix 格式） |
+| put dir_name remote | 将本地的 dir_name文件夹推送到开发板上，并且重命名为 remote |
+
+### 代码文件运行
+
+| 命令                 | 功能                                                         |
+| -------------------- | ------------------------------------------------------------ |
+| run xx.py            | 在开发板上执行本地目录下的 xx.py 文件                        |
+| run none -d hello.py | 执行设备上的 `hello.py` 文件，注意如果该程序不返回，则程序无法从终端返回 |
+
+### 文件夹同步
 
 ```python
 python cli.py -p com18 sync -l "G:\sync_dir" -i "G:\file_list_cache"

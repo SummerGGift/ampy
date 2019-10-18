@@ -474,6 +474,11 @@ def repl_serial_to_stdout(serial):
         data = b''
         while serial_reader_running:
             count = serial.inWaiting()
+
+            if count == 0:
+                time.sleep(0.01)
+                continue
+
             if count > 0:
                 try:
                     data += serial.read(count)

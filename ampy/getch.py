@@ -34,7 +34,7 @@ class _GetchUnix:
         fd = sys.stdin.fileno()
         old_settings = termios.tcgetattr(fd)
         try:
-            tty.setraw(sys.stdin.fileno())
+            tty.setcbreak(fd, termios.TCSANOW)
             ch = sys.stdin.buffer.read(1)
         finally:
             termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)

@@ -557,8 +557,14 @@ def repl(query = None):
         # Wake up the prompt
         serial.write(b'\r')
 
+        count = 0
+
         while True:
             char = getch()
+            count += 1
+            if count == 1000:
+                time.sleep(0.1)
+                count = 0
 
             if char == b'\x07':
                 serial_out_put_enable = False

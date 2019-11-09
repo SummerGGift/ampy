@@ -14,6 +14,10 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 
 使用任何命令都需要指定本次操作的串口，例如 `python cli.py -p COM18` 的意思是对 COM18 串口的设备进行操作，后续所有的命令前也都需要添加该格式。
 
+### 查询可用串口
+
+- python cli.py -p query portscan
+
 ### 进入 repl 模式
 
 连接串口并打开 repl 模式的命令如下：

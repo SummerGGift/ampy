@@ -29,7 +29,9 @@ import os
 import platform
 import posixpath
 import re
+import serial
 import serial.serialutil
+import serial.tools.list_ports
 import threading
 import click
 import dotenv
@@ -800,6 +802,19 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
     #         board_files.put(remote, infile.read())
 
     _board.soft_reset_board()
+
+
+@cli.command()
+def portscan(port=None):
+    """Scan all serial ports on your system."""
+
+    port_list = list(serial.tools.list_ports.comports())
+
+    if len(port_list) <= 0:
+        print("can't find any serial in system.")
+    else:
+        print([list(port_list[i])[0] for i in range(0, len(port_list))])
+
 
 if __name__ == "__main__":
     try:

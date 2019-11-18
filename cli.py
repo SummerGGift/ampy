@@ -789,7 +789,7 @@ def portscan(port=None):
     else:
         print([list(port_list[i])[0] for i in range(0, len(port_list))])
 
-    sys.exit(0)
+    os._exit(0)
 
 
 if __name__ == "__main__":

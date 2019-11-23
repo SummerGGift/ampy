@@ -41,6 +41,7 @@ import hashlib
 import json
 import ampy.files as files
 import ampy.pyboard as pyboard
+import gc
 
 from ampy.getch import getch
 from ampy.file_sync import file_sync_info
@@ -789,6 +790,8 @@ def portscan(port=None):
     else:
         print([list(port_list[i])[0] for i in range(0, len(port_list))])
 
+    del port_list
+	gc.collect()
     os._exit(0)
 
 

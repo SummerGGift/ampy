@@ -791,7 +791,7 @@ def portscan(port=None):
         print([list(port_list[i])[0] for i in range(0, len(port_list))])
 
     del port_list
-	gc.collect()
+    gc.collect()
     os._exit(0)
 
 

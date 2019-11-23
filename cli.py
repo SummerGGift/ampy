@@ -792,7 +792,7 @@ def portscan(port=None):
 
     del port_list
     gc.collect()
-    os._exit(0)
+    # os._exit(0)
 
 
 if __name__ == "__main__":

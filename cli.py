@@ -564,6 +564,10 @@ def repl(query = None):
 
         while True:
             char = getch()
+
+            if char == b'\x16':
+                char = b'\x03'
+
             count += 1
             if count == 1000:
                 time.sleep(0.1)

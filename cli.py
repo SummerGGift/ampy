@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Adafruit MicroPython Tool - Command Line Interface
 # Author: Tony DiCola
 # Copyright (c) 2016 Adafruit Industries
@@ -474,7 +475,7 @@ def repl_serial_to_stdout(serial):
         return hex_data
 
     try:
-        data = b''
+        data = b""
         while serial_reader_running:
             count = serial.inWaiting()
 
@@ -484,25 +485,30 @@ def repl_serial_to_stdout(serial):
 
             if count > 0:
                 try:
-                    data += serial.read(count)
+                    data += serial.read_all()
 
-                    if len(data) < 20:
-                        try:
-                            data.decode()
-                        except UnicodeDecodeError:
-                            continue
+                    # don't publish incomplete utf-8 data
+                    try:
+                        data.decode("utf-8")
+                        to_be_published = data
+                        data = b""
+                    except UnicodeDecodeError as e:
+                        if e.start == 0:
+                            # Invalid start byte, ie. we have missed first byte(s) of the codepoint.
+                            to_be_published = data
+                            data = b""
+                        else:
+                            to_be_published = data[: e.start]
+                            data = data[e.start :]
 
-                    if data != b'':
+                    if to_be_published:
                         if serial_out_put_enable and serial_out_put_count > 0:
                             if _system == "Linux":
-                                sys.stdout.buffer.write(data)
+                                sys.stdout.buffer.write(to_be_published)
                             else:
-                                sys.stdout.buffer.write(data.replace(b"\r", b""))
+                                sys.stdout.buffer.write(to_be_published.replace(b"\r", b""))
                             sys.stdout.buffer.flush()
-                    else:
-                        serial.write(hexsend(data))
 
-                    data = b''
                     serial_out_put_count += 1
 
                 except serial.serialutil.SerialException:

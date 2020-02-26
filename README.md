@@ -10,6 +10,16 @@
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv pyinstaller
 ```
 
+## 命令使用方式
+
+### 运行功能脚本
+
+例如 `python cli.py -p COM18 repl` 的意思是连接 COM18 串口并进入 repl 模式。
+
+### 运行可执行文件
+
+例如 `./cli.exe -p COM18 repl` 的意思是连接 COM18 串口并进入 repl 模式。
+
 ## 功能介绍
 
 使用任何命令都需要指定本次操作的串口，例如 `python cli.py -p COM18` 的意思是对 COM18 串口的设备进行操作，后续所有的命令前也都需要添加该格式。

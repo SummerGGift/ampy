@@ -83,11 +83,19 @@ python cli.py -p com18 sync -l "G:\sync_dir" -i "G:\file_list_cache"
 
 向串口发送 b'\xe8' 字符将会关闭回显功能，向串口发送 b'\xe9' 将会重新打开回显功能。该功能可用在按下 `CTRL + E` 进入粘贴模式前，关闭回显，使得输入的内容不显示在终端上。
 
-### Package cli on Windows
+## 重新打包 cli 工具
+
+cli 在不同的系统上运行，可能需要重新打包，如果该工具在您的系统上无法运行，可以尝试用如下命令重新打包，然后在插件中重新替换 cli 工具即可。插件后端一般路径如下：
+
+```
+.vscode\extensions\rt-thread.rt-thread-micropython-1.x.x\ampy
+```
+
+### 在 windows 系统上打包 cli 
 
 `pyinstaller.exe -F .\cli.py -p ampy`
 
-### Package cli on Linux
+### 在 linux（包括 Deepin Mac 等类 linux 操作系统） 系统上打包 cli  
 
 `pyinstaller -F cli.py -p ampy`
 

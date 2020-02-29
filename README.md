@@ -1,10 +1,10 @@
 # Tools For RT-Thread MicroPython 
 
-本仓库为 `RT-Thread MicroPython` 串口命令行工具源代码，欢迎使用 [RT-Thread MicroPython](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 进行 MicroPython 项目开发。
+本仓库为 `RT-Thread MicroPython IDE` 串口命令行工具后端源代码，欢迎使用 [RT-Thread MicroPython](https://marketplace.visualstudio.com/items?itemName=RT-Thread.rt-thread-micropython) 进行 MicroPython 项目开发。其功能为连接 MicroPython 设备，并基于该设备执行 MicroPython 开发过程中的各种操作。
 
 ## 安装方式
 
-输入安装依赖命令：
+在命令行中输入如下命令，安装该工具所依赖的软件包：
 
 ```python
 python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial python-dotenv pyinstaller
@@ -12,19 +12,23 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 
 ## 命令使用方式
 
-### 运行功能脚本
+- 运行功能脚本
+
+安装后可以直接运行 cli.py 脚本来操作 MicroPython 设备。 
 
 例如 `python cli.py -p COM18 repl` 的意思是连接 COM18 串口并进入 repl 模式。
 
-### 运行可执行文件
+- 运行可执行文件
+
+可执行文件存放在 dist 文件夹下，里面存放了不同操作系统下的可执行文件：
 
 例如 `./cli.exe -p COM18 repl` 的意思是连接 COM18 串口并进入 repl 模式。
 
-## 功能介绍
+### 连接串口
 
 使用任何命令都需要指定本次操作的串口，例如 `python cli.py -p COM18` 的意思是对 COM18 串口的设备进行操作，后续所有的命令前也都需要添加该格式。
 
-### 查询可用串口
+### 查询系统中可用串口
 
 - python cli.py -p query portscan
 
@@ -45,12 +49,21 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 | ls -r -l    | 递归打印出 / 目录中文件列表以及 crc 校验值 |
 | ls /scripts | 打印出开发板上 /scripts 文件夹中的文件列表 |
 
+例如：
+
+- python cli.py -p COM18 ls
+
 ### 创建删除文件夹/文件
+
 | 命令           | 功能                                                   |
 | -------------- | ------------------------------------------------------ |
 | mkdir dir_name | 创建文件夹，名为 dir_name                              |
 | rmdir dir_name | 递归地删除 dir_name 文件夹中的所有文件，最终删除文件夹 |
 | rm filename    | 可以用来删除某个特定文件                               |
+
+例如：
+
+- python cli.py -p COM18 mkdir dir_test_name
 
 ### 文件传输操作
 
@@ -59,6 +72,10 @@ python -m pip install -i https://pypi.tuna.tsinghua.edu.cn/simple click pyserial
 | get xx.py xx.py     | 从开发板中获取 xx.py 到本地，并将该文件命名为 xx.py        |
 | put xx.py xx.py     | 将本地文件传入到开发板中（注意写入的文件必须是 unix 格式） |
 | put dir_name remote | 将本地的 dir_name文件夹推送到开发板上，并且重命名为 remote |
+
+例如：
+
+- python cli.py -p COM18 get board.py local.py
 
 ### 代码文件运行
 

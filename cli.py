@@ -42,6 +42,7 @@ import json
 import ampy.files as files
 import ampy.pyboard as pyboard
 import gc
+import ast
 
 from ampy.getch import getch
 from ampy.file_sync import file_sync_info
@@ -677,7 +678,18 @@ def repl(query = None):
     metavar="query",
 )
 
-def sync(local_path, file_pathname, remote_path = None, info_pathname = None, query = None):
+@click.option(
+    "--excluded",
+    "-x",
+    envvar="excluded",
+    # required=True,
+    default=None,
+    type=click.STRING,
+    help="An array-like string of file patterns to be excluded. Supports asterisk (*) wildcards at start or end of pattern",
+    metavar="excluded",
+)
+
+def sync(local_path, file_pathname, remote_path = None, info_pathname = None, query = None, excluded = None):
     def _sync_file(sync_info, local, remote = None):
         local = local.replace('\\', '/')
         delete_file_list = sync_info["delete"]
@@ -759,7 +771,8 @@ def sync(local_path, file_pathname, remote_path = None, info_pathname = None, qu
         board_files._ls_sync(long_format=True, recursive=True, pathname = info_pathname)
 
     # Gets file synchronization information
-    sync_info, pc_file_info = file_sync_info(local_path, info_pathname, rtt_version_flag)
+    excluded = ast.literal_eval(excluded) if excluded else []
+    sync_info, pc_file_info = file_sync_info(local_path, info_pathname, excluded, rtt_version_flag)
 
     # print("sync_info------------------------------")
     # print(sync_info)

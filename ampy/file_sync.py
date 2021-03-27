@@ -156,25 +156,25 @@ def get_sync_info(pc_info, dev_info):
     return sync_info
 
 def should_exclude(name, excluded):
-  name = name.lower()
-  for exclusion in excluded:
-    exclusion = exclusion.lower()
-    if exclusion.startswith("*") and exclusion.endswith("*"):
-      match_type = "IN"
-    elif exclusion.startswith("*"):
-      match_type = "END"
-    elif exclusion.endswith("*"):
-      match_type = "START"
-    else: 
-      match_type = "EXACT"
-    raw_exclusion = exclusion.replace("*","")
-    if ((match_type == "IN" and raw_exclusion in name)
-    or (match_type == "END" and name.endswith(raw_exclusion))
-    or (match_type == "START" and name.startswith(raw_exclusion))
-    or (match_type == "EXACT" and name == raw_exclusion)):
-        print(f"File {name} skipped due to matching {exclusion}")
-        return True
-  return False
+    name = name.lower()
+    for exclusion in excluded:
+        exclusion = exclusion.lower()
+        if exclusion.startswith("*") and exclusion.endswith("*"):
+            match_type = "IN"
+        elif exclusion.startswith("*"):
+            match_type = "END"
+        elif exclusion.endswith("*"):
+            match_type = "START"
+        else: 
+            match_type = "EXACT"
+        raw_exclusion = exclusion.replace("*","")
+        if ((match_type == "IN" and raw_exclusion in name)
+        or (match_type == "END" and name.endswith(raw_exclusion))
+        or (match_type == "START" and name.startswith(raw_exclusion))
+        or (match_type == "EXACT" and name == raw_exclusion)):
+            print(f"File {name} skipped due to matching {exclusion}")
+            return True
+    return False
 
 
 def file_sync_info(local_path, info_pathname, excluded, rtt_version):

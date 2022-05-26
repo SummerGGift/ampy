@@ -475,6 +475,8 @@ def repl_serial_to_stdout(serial):
 
     try:
         data = b''
+        show_data = b''
+        is_running = False
         while serial_reader_running:
             count = serial.inWaiting()
 
@@ -486,24 +488,66 @@ def repl_serial_to_stdout(serial):
                 try:
                     data += serial.read(count)
 
+                    # if len(data) < 10:
+                    #     if data.find(b'>>>') or data.find(b'msh') > 0:
+                    #         data_python_split = data.split(b'>>>')
+                    #         data_msh_split = data.split(b'msh')
+                    #         if len(data_python_split) == 2 or len(data_msh_split) == 2:
+                    #             data_python_cmd = data_python_split[0]
+                    #             data_msh_cmd = data_msh_split[0]
+                    #             # 此处为首次连接到板子时，板子上进入到python命令输入标识 >>> 时输出的内容为b'\r\n>>>'
+                    #             if len(data_python_cmd) > 0 or len(data_msh_cmd) > 0:
+                    #                 is_running = False
+                    #                 sys.stdout.buffer.write(data)
+                    #                 sys.stdout.buffer.flush()
+                    #                 data = b''
+                    #                 continue
                     if len(data) < 20:
                         try:
+                            is_running = False
                             data.decode()
                         except UnicodeDecodeError:
                             continue
-
                     if data != b'':
-                        if serial_out_put_enable and serial_out_put_count > 0:
-                            if _system == "Linux":
-                                sys.stdout.buffer.write(data)
-                            else:
-                                sys.stdout.buffer.write(data.replace(b"\r", b""))
-                            sys.stdout.buffer.flush()
+                        show_data += data
+                        if serial_out_put_enable:
+                            # write_log_file("c:/log1.txt", str(data), 'a')
+                            # 右键运行时会传入的值
+                            if show_data.find(b"print()") > 0 and not is_running:
+                                end_index = show_data.find(b"print()")
+                                if end_index > 0:
+                                    #通过 print() 将内容分隔成2份，print()后面的即为真实的输出的内容
+                                    real_datas = show_data.split(b"print()")
+
+                                    if len(real_datas) == 2:
+                                        #获取真实输出
+                                        real_data = real_datas[1]
+
+                                        #输出到终端
+                                        write_to_terminal(_system, real_data)
+
+                                        if show_data.find(b">>>") > 0:
+                                            # write_log_file("c:/log2.txt", str(show_data), 'a')
+                                            is_running = False
+                                        else:
+                                            is_running = True
+                                        show_data = b''
+
+                            elif data.find(b'>>>'):
+                                write_to_terminal(_system, data)
+                            elif is_running:
+                                # 输出到终端
+                                write_to_terminal(_system, show_data)
+
+                                # write_log_file("c:/log3.txt", str(show_data), 'a')
+                                if show_data.find(b">>>") > 0:
+                                    is_running = False
+                                show_data = b''
                     else:
                         serial.write(hexsend(data))
 
                     data = b''
-                    serial_out_put_count += 1
+                    # serial_out_put_count += 1
 
                 except serial.serialutil.SerialException:
                     # This happens if the pyboard reboots, or a USB port
@@ -522,6 +566,20 @@ def repl_serial_to_stdout(serial):
     except KeyboardInterrupt:
         if serial != None:
             serial.close()
+
+
+def write_to_terminal(_system, real_data):
+    if _system == "Linux":
+        sys.stdout.buffer.write(real_data)
+    else:
+        sys.stdout.buffer.write(real_data.replace(b'\r', b''))
+    sys.stdout.buffer.flush()
+
+
+def write_log_file(filepath, content, mode):
+    with open(filepath, mode) as file:
+        file.write(content)
+        file.write("\r\n------------\r\n")
 
 @cli.command()
 @click.option(
@@ -561,7 +619,6 @@ def repl(query = None):
         serial.write(b'\r')
 
         count = 0
-
         while True:
             char = getch()
 
